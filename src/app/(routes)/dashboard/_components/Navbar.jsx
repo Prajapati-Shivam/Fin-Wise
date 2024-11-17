@@ -8,10 +8,10 @@ import React from 'react';
 import { ToggleMode } from '@/components/ToggleMode';
 import Link from 'next/link';
 
-export const Header = () => {
+export const Navbar = () => {
   const { user, isSignedIn } = useUser();
   return (
-    <div className='relative py-6 px-4 sm:px-8 flex justify-between items-center z-20'>
+    <div className='relative py-4 sm:py-6 px-4 sm:px-8 flex justify-between items-center z-20 border-2'>
       <div>
         {/* logo to be added later */}
         {/* <Image alt='logo' src={} /> */}
@@ -19,9 +19,16 @@ export const Header = () => {
           <span className='font-bold text-2xl'>FinWise</span>
         </Link>
       </div>
-      <div className='flex items-center gap-2'>
+      <div className='flex items-center gap-x-4 mr-10'>
         <ToggleMode />
-        {isSignedIn && <UserButton />}
+        {isSignedIn && (
+          <>
+            <Link href={'/dashboard'} className='hidden sm:block'>
+              <Button className='rounded-full'>Dashboard</Button>
+            </Link>
+            <UserButton />
+          </>
+        )}
       </div>
     </div>
   );
