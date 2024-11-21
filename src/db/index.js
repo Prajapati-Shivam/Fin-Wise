@@ -1,9 +1,9 @@
 import { neon } from '@neondatabase/serverless';
 import { drizzle } from 'drizzle-orm/neon-http';
 import * as schema from './schema';
-import { config } from 'dotenv';
+import 'dotenv/config';
+if (!process.env.NEXT_PUBLIC_DATABASE_URL)
+  throw new Error('No DATABASE_URL found!');
 
-config({ path: '.env.local' });
-
-const sql = neon(process.env.DATABASE_URL);
+const sql = neon(process.env.NEXT_PUBLIC_DATABASE_URL);
 export const db = drizzle(sql, { schema });

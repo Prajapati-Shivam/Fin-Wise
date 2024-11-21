@@ -11,7 +11,7 @@ import Link from 'next/link';
 export const Navbar = () => {
   const { user, isSignedIn } = useUser();
   return (
-    <div className='relative py-4 sm:py-6 px-4 sm:px-8 flex justify-between items-center z-20 border-2'>
+    <div className='relative py-4 sm:py-6 px-4 sm:px-8 flex justify-between items-center z-20'>
       <div>
         {/* logo to be added later */}
         {/* <Image alt='logo' src={} /> */}

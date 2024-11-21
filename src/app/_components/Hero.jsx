@@ -23,9 +23,11 @@ export const Hero = () => {
           <div className='text-center'>
             <h1 className='text-balance text-5xl font-semibold tracking-tight sm:text-6xl'>
               Manage money with AI-Driven <br />
-              <span className='text-gray-300'>Finance Advisor</span>
+              <span className='dark:text-gray-400 text-gray-600'>
+                Finance Advisor
+              </span>
             </h1>
-            <div className='mt-8 h-14 flex items-center justify-center sm:h-0 text-pretty text-xl font-medium text-gray-500 sm:text-xl'>
+            <div className='mt-8 h-14 flex items-center justify-center sm:h-0 text-pretty text-xl font-medium dark:text-gray-300 text-gray-700 sm:text-xl'>
               <CycleText />
             </div>
             <div className='mt-10 flex items-center justify-center gap-x-4'>
