@@ -1,20 +1,14 @@
 'use client';
 import {
-  Calendar,
   CircleDollarSign,
-  Home,
-  Inbox,
   LayoutDashboard,
   PanelRight,
   PiggyBank,
   ReceiptText,
-  Search,
-  Settings,
   Shield,
 } from 'lucide-react';
 import { UserButton, useUser } from '@clerk/nextjs';
 import { usePathname } from 'next/navigation';
-import { useEffect } from 'react';
 import {
   Sheet,
   SheetContent,
@@ -24,8 +18,8 @@ import {
   SheetTrigger,
   SheetClose,
 } from '@/components/ui/sheet';
-
 import Link from 'next/link';
+
 // Menu items.
 const items = [
   {
@@ -52,33 +46,32 @@ const items = [
     url: '/dashboard/expenses',
     icon: ReceiptText,
   },
-  {
-    id: 5,
-    title: 'Upgrade',
-    url: '/dashboard/upgrade',
-    icon: Shield,
-  },
+  // {
+  //   id: 5,
+  //   title: 'Upgrade',
+  //   url: '/dashboard/upgrade',
+  //   icon: Shield,
+  // },
 ];
 
 export function SideNav() {
   const path = usePathname();
-
-  useEffect(() => {
-    console.log(path);
-  }, [path]);
-
   const user = useUser();
+
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <div className='fixed right-4 sm:right-10 top-4 sm:top-6 z-50 cursor-pointer py-2'>
+        <div
+          className='fixed right-4 sm:right-10 top-4 sm:top-6 z-50 cursor-pointer py-2'
+          aria-label='Open navigation menu'
+        >
           <PanelRight size={25} />
         </div>
       </SheetTrigger>
       <SheetContent side='right'>
         <SheetHeader>
           <SheetTitle className='p-4 flex items-center gap-x-3'>
-            {user.isLoaded ? (
+            {user.isLoaded && user.user ? (
               <>
                 <UserButton />
                 <span className='hidden sm:block text-2xl font-bold text-left line-clamp-1'>
@@ -103,6 +96,7 @@ export function SideNav() {
                     ? 'font-bold bg-slate-400 dark:bg-slate-900'
                     : ''
                 }`}
+                aria-label={`Navigate to ${item.title}`}
               >
                 <span className='flex w-6 items-center justify-center'>
                   <item.icon />

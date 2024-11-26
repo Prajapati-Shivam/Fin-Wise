@@ -21,7 +21,14 @@ export const Header = () => {
       </div>
       <div className='flex items-center gap-2'>
         <ToggleMode />
-        {isSignedIn && <UserButton />}
+        {isSignedIn && (
+          <>
+            <Link href={'/dashboard'} className='hidden sm:block'>
+              <Button className='rounded-full'>Dashboard</Button>
+            </Link>
+            <UserButton />
+          </>
+        )}
       </div>
     </div>
   );
