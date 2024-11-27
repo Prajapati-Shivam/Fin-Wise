@@ -22,7 +22,7 @@ export default function DashboardLayout({ children }) {
       .from(Budgets)
       .where(eq(user.primaryEmailAddress.emailAddress, Budgets.createdBy));
 
-    if (result?.length == 0) router.replace('/dashboard/budgets');
+    // if (result?.length == 0) router.replace('/dashboard/budgets');
     console.log(result);
   };
 

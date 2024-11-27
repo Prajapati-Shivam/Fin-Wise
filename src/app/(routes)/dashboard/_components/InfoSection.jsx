@@ -5,6 +5,8 @@ import { useUser } from '@clerk/nextjs';
 import InfoCard from './InfoCard';
 import { PiggyBank, ReceiptText, Wallet, CircleDollarSign } from 'lucide-react';
 import useFinanceStore from '@/app/_store/financeStore';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 const InfoSection = () => {
   const { user } = useUser();
   const [totalIncome, setTotalIncome] = useState(0);
@@ -111,13 +113,27 @@ const InfoSection = () => {
           </div>
         </div>
       ) : (
-        <div className='mt-7 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5'>
-          {[1, 2, 3].map((item, index) => (
-            <div
-              className='h-[110px] w-full bg-slate-200 animate-pulse rounded-lg'
-              key={index}
-            ></div>
-          ))}
+        // <div className='mt-7 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5'>
+        //   {[1, 2, 3].map((item, index) => (
+        //     <div
+        //       className='h-[110px] w-full bg-slate-200 animate-pulse rounded-lg'
+        //       key={index}
+        //     ></div>
+        //   ))}
+        // </div>
+        <div className='flex flex-col gap-4 mt-8 justify-center items-center border-2 py-5 rounded-2xl'>
+          <div className='border-4 border-black dark:border-white p-4 rounded-full'>
+            <PiggyBank className='size-14' />
+          </div>
+          <h3 className='font-semibold text-2xl'>No Budget</h3>
+          <p className='text-gray-800 dark:text-gray-200 text-center'>
+            Get started by creating a new budget
+          </p>
+          <Link href={'/dashboard/budgets'}>
+            <Button variant='secondary' className='rounded-full'>
+              + New Budget
+            </Button>
+          </Link>
         </div>
       )}
     </div>

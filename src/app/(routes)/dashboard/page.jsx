@@ -9,8 +9,8 @@ const Dashboard = () => {
 
   return (
     <div className='p-8'>
-      <h2 className='text-4xl font-bold'>Hi, {user?.fullName}</h2>
-      <p className='text-gray-600 dark:text-gray-400'>
+      <h2 className='text-4xl font-bold'>Hi, {user?.fullName}👋</h2>
+      <p className='text-gray-600 dark:text-gray-400 mt-2'>
         What happening with your money? Let manage your expenses.
       </p>
       <div>
