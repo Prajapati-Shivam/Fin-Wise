@@ -10,13 +10,12 @@ function BudgetItem({ budget }) {
     <Link href={'/dashboard/expenses/' + budget?.id}>
       <div
         className='p-5 border rounded-2xl
-    hover:shadow-md cursor-pointer h-[170px]'
+    hover:shadow-md cursor-pointer h-[150px] flex flex-col justify-between'
       >
         <div className='flex gap-2 items-center justify-between'>
           <div className='flex gap-2 items-center'>
             <h2
-              className='text-2xl p-3 px-4
-              bg-slate-100 rounded-full 
+              className='text-2xl size-10 flex items-center justify-center bg-slate-100 rounded-full 
               '
             >
               {budget?.icon}
@@ -31,12 +30,12 @@ function BudgetItem({ budget }) {
 
         <div className='mt-5'>
           <div className='flex items-center justify-between mb-3'>
-            <h2 className='text-xs text-slate-400'>
+            <div className='text-xs text-slate-400'>
               ${budget.totalSpend ? budget.totalSpend : 0} Spend
-            </h2>
-            <h2 className='text-xs text-slate-400'>
+            </div>
+            <div className='text-xs text-slate-400'>
               ${budget.amount - budget.totalSpend} Remaining
-            </h2>
+            </div>
           </div>
           <div
             className='w-full
