@@ -17,8 +17,9 @@ import { db } from '@/db';
 import { Budgets } from '@/db/schema';
 import { useUser } from '@clerk/nextjs';
 import { toast } from 'sonner';
+import useFinanceStore from '@/app/_store/financeStore';
 
-function CreateBudget({ refreshData }) {
+function CreateBudget() {
   const [emojiIcon, setEmojiIcon] = useState('😀');
   const [openEmojiPicker, setOpenEmojiPicker] = useState(false);
   const [name, setName] = useState('');
@@ -26,6 +27,7 @@ function CreateBudget({ refreshData }) {
   const [loading, setLoading] = useState(false);
 
   const { user } = useUser();
+  const { fetchBudgetList } = useFinanceStore();
 
   const onCreateBudget = async () => {
     if (!name || !amount || isNaN(amount) || Number(amount) <= 0) {
@@ -46,17 +48,17 @@ function CreateBudget({ refreshData }) {
         .returning({ insertedId: Budgets.id });
 
       if (result.length > 0) {
-        toast.success('New Budget Created!');
-        refreshData();
+        toast('New Budget Created!');
+        fetchBudgetList(user?.primaryEmailAddress?.emailAddress); // Refresh budget list
         setName('');
         setAmount('');
         setEmojiIcon('😀');
       } else {
-        toast.error('Failed to create budget. Please try again.');
+        toast('Failed to create budget. Please try again.');
       }
     } catch (error) {
       console.error('Error creating budget:', error);
-      toast.error('An error occurred while creating the budget.');
+      toast('An error occurred while creating the budget.');
     } finally {
       setLoading(false);
     }
@@ -102,7 +104,7 @@ function CreateBudget({ refreshData }) {
                   )}
                 </div>
                 <div className='mt-2'>
-                  <p className='text-black font-medium my-1'>Budget Name</p>
+                  <p className='font-medium my-1'>Budget Name</p>
                   <Input
                     placeholder='e.g. Home Decor'
                     value={name}
@@ -110,7 +112,7 @@ function CreateBudget({ refreshData }) {
                   />
                 </div>
                 <div className='mt-2'>
-                  <p className='text-black font-medium my-1'>Budget Amount</p>
+                  <p className='font-medium my-1'>Budget Amount</p>
                   <Input
                     type='number'
                     placeholder='e.g. ₹5000'

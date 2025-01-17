@@ -3,28 +3,23 @@ import { useUser } from '@clerk/nextjs';
 import { Navbar } from './_components/Navbar';
 import { SideNav } from './_components/SideNav';
 import { useRouter } from 'next/navigation';
-import { db } from '@/db/index';
-import { Budgets } from '@/db/schema';
-import { eq } from 'drizzle-orm';
 import { useEffect } from 'react';
+import useFinanceStore from '@/app/_store/financeStore';
 
 export default function DashboardLayout({ children }) {
   const { user } = useUser();
+  const { fetchBudgetList, budgetList } = useFinanceStore();
   const router = useRouter();
 
   useEffect(() => {
-    user && checkUserBudget();
-  });
+    if (user?.primaryEmailAddress?.emailAddress) {
+      fetchBudgetList(user.primaryEmailAddress.emailAddress);
+    }
+  }, [fetchBudgetList, user?.primaryEmailAddress?.emailAddress]);
 
-  const checkUserBudget = async () => {
-    const result = await db
-      .select()
-      .from(Budgets)
-      .where(eq(user.primaryEmailAddress.emailAddress, Budgets.createdBy));
-
-    // if (result?.length == 0) router.replace('/dashboard/budgets');
-    console.log(result);
-  };
+  if (budgetList.length === 0) {
+    router.replace('/dashboard/budgets');
+  }
 
   return (
     <>

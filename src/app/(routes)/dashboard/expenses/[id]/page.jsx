@@ -1,14 +1,15 @@
 'use client';
-import { db } from '@/db';
-import { Budgets, Expenses } from '@/db/schema';
+import React, { useEffect } from 'react';
 import { useUser } from '@clerk/nextjs';
-import { desc, eq, getTableColumns, sql } from 'drizzle-orm';
-import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
+import { ArrowLeft, Trash } from 'lucide-react';
+
 import BudgetItem from '../../budgets/_components/BudgetItem';
 import AddExpense from '../_components/AddExpense';
 import ExpenseListTable from '../_components/ExpenseListTable';
-import { Button } from '@/components/ui/button';
-import { ArrowLeft, Pen, PenBox, Trash } from 'lucide-react';
+import EditBudget from '../_components/EditBudget';
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,79 +21,65 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { toast } from 'sonner';
-import { useRouter } from 'next/navigation';
-import EditBudget from '../_components/EditBudget';
+
+import { Button } from '@/components/ui/button';
+import useFinanceStore from '@/app/_store/financeStore';
 
 function ExpensesScreen({ params }) {
   const { user } = useUser();
-  const [budgetInfo, setbudgetInfo] = useState();
-  const [expensesList, setExpensesList] = useState([]);
-  const route = useRouter();
+  const router = useRouter();
+
+  const {
+    budgetList,
+    expenseList,
+    fetchBudgetList,
+    fetchExpenseList,
+    loading,
+    error,
+  } = useFinanceStore();
+
+  const currentBudget = budgetList.find((budget) => budget.id == params.id);
+  // Fetch data on component mount or user change
   useEffect(() => {
-    user && getBudgetInfo();
-  }, [user]);
-
-  const getBudgetInfo = async () => {
-    const result = await db
-      .select({
-        ...getTableColumns(Budgets),
-        totalSpend: sql`sum(${Expenses.amount} as NUMERIC)`.mapWith(Number),
-        totalItem: sql`count(${Expenses.id} as NUMBERIC)`.mapWith(Number),
-      })
-      .from(Budgets)
-      .leftJoin(Expenses, eq(Budgets.id, Expenses.budgetId))
-      .where(eq(Budgets.createdBy, user?.primaryEmailAddress?.emailAddress))
-      .where(eq(Budgets.id, params.id))
-      .groupBy(Budgets.id);
-
-    setbudgetInfo(result[0]);
-    getExpensesList();
-  };
-
-  /**
-   * Get Latest Expenses
-   */
-  const getExpensesList = async () => {
-    const result = await db
-      .select()
-      .from(Expenses)
-      .where(eq(Expenses.budgetId, params.id))
-      .orderBy(desc(Expenses.id));
-    setExpensesList(result);
-    console.log(result);
-  };
-
-  /**
-   * Used to Delete budget
-   */
-  const deleteBudget = async () => {
-    const deleteExpenseResult = await db
-      .delete(Expenses)
-      .where(eq(Expenses.budgetId, params.id))
-      .returning();
-
-    if (deleteExpenseResult) {
-      const result = await db
-        .delete(Budgets)
-        .where(eq(Budgets.id, params.id))
-        .returning();
+    if (user) {
+      fetchBudgetList(user.primaryEmailAddress.emailAddress);
+      fetchExpenseList(user.primaryEmailAddress.emailAddress);
     }
-    toast('Budget Deleted!');
-    route.replace('/dashboard/budgets');
+  }, [user, fetchBudgetList, fetchExpenseList]);
+
+  // Delete budget and related expenses
+  const handleDeleteBudget = async () => {
+    try {
+      await db
+        .delete(Expenses)
+        .where(eq(Expenses.budgetId, params.id))
+        .returning();
+      await db.delete(Budgets).where(eq(Budgets.id, params.id)).returning();
+
+      toast.success('Budget Deleted!');
+      router.replace('/dashboard/budgets');
+    } catch (error) {
+      console.error('Error deleting budget:', error);
+      toast.error('Failed to delete budget.');
+    }
   };
 
   return (
     <div className='p-10'>
       <h2 className='text-2xl font-bold gap-2 flex justify-between items-center'>
-        <span className='flex gap-2 items-center'>
-          <ArrowLeft onClick={() => route.back()} className='cursor-pointer' />
+        <span
+          className='flex gap-2 items-center cursor-pointer'
+          onClick={() => router.back()}
+        >
+          <ArrowLeft />
           My Expenses
         </span>
         <div className='flex gap-2 items-center'>
           <EditBudget
-            budgetInfo={budgetInfo}
-            refreshData={() => getBudgetInfo()}
+            budgetInfo={currentBudget}
+            refreshData={() =>
+              fetchBudgetList(user.primaryEmailAddress.emailAddress)
+            }
           />
 
           <AlertDialog>
@@ -105,14 +92,13 @@ function ExpensesScreen({ params }) {
               <AlertDialogHeader>
                 <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  This action cannot be undone. This will permanently delete
-                  your current budget along with expenses and remove your data
-                  from our servers.
+                  This action cannot be undone. This will permanently delete the
+                  budget and all related expenses.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={() => deleteBudget()}>
+                <AlertDialogAction onClick={handleDeleteBudget}>
                   Continue
                 </AlertDialogAction>
               </AlertDialogFooter>
@@ -124,26 +110,39 @@ function ExpensesScreen({ params }) {
         className='grid grid-cols-1 
         md:grid-cols-2 mt-6 gap-5'
       >
-        {budgetInfo ? (
-          <BudgetItem budget={budgetInfo} />
-        ) : (
+        {loading ? (
           <div
             className='h-[150px] w-full bg-slate-200 
             rounded-lg animate-pulse'
           ></div>
+        ) : currentBudget ? (
+          <BudgetItem budget={currentBudget} />
+        ) : (
+          <div>No Budget Found</div>
         )}
         <AddExpense
           budgetId={params.id}
           user={user}
-          refreshData={() => getBudgetInfo()}
+          refreshData={() =>
+            fetchExpenseList(user.primaryEmailAddress.emailAddress)
+          }
         />
       </div>
       <div className='mt-4'>
-        <ExpenseListTable
-          expensesList={expensesList}
-          refreshData={() => getBudgetInfo()}
-        />
+        {loading ? (
+          <div>Loading expenses...</div>
+        ) : (
+          <ExpenseListTable
+            expensesList={expenseList.filter(
+              (expense) => expense.budgetId == params.id
+            )}
+            refreshData={() =>
+              fetchExpenseList(user.primaryEmailAddress.emailAddress)
+            }
+          />
+        )}
       </div>
+      {error && <div className='text-red-500 mt-4'>{error}</div>}
     </div>
   );
 }

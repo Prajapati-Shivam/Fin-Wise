@@ -1,56 +1,31 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import CreateBudget from './CreateBudget';
-import { db } from '@/db';
-import { desc, eq, getTableColumns, sql } from 'drizzle-orm';
-import { Budgets, Expenses } from '@/db/schema';
-import { useUser } from '@clerk/nextjs';
 import BudgetItem from './BudgetItem';
+import { useUser } from '@clerk/nextjs';
+import useFinanceStore from '@/app/_store/financeStore';
 
 function BudgetList() {
-  const [budgetList, setBudgetList] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const { fetchBudgetList, budgetList, loading, error } = useFinanceStore();
   const { user } = useUser();
 
   useEffect(() => {
     if (user?.primaryEmailAddress?.emailAddress) {
-      getBudgetList();
+      fetchBudgetList(user.primaryEmailAddress.emailAddress);
     }
-  }, [user?.primaryEmailAddress?.emailAddress]);
-
-  const getBudgetList = async () => {
-    try {
-      setLoading(true);
-      setError('');
-      const result = await db
-        .select({
-          ...getTableColumns(Budgets),
-          totalSpend: sql`sum(CAST(${Expenses.amount} AS NUMERIC))`.mapWith(
-            Number
-          ),
-          totalItem: sql`count(${Expenses.id})`.mapWith(Number),
-        })
-        .from(Budgets)
-        .leftJoin(Expenses, eq(Budgets.id, Expenses.budgetId))
-        .where(eq(Budgets.createdBy, user?.primaryEmailAddress?.emailAddress))
-        .groupBy(Budgets.id)
-        .orderBy(desc(Budgets.id));
-      setBudgetList(result);
-    } catch (error) {
-      console.error('Error fetching budget list:', error);
-      setError('Failed to load budgets. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [user?.primaryEmailAddress?.emailAddress, fetchBudgetList]);
 
   const placeholders = Array.from({ length: 5 });
 
   return (
     <div className='mt-7'>
       <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5'>
-        <CreateBudget refreshData={getBudgetList} />
+        <CreateBudget
+          refreshData={() =>
+            fetchBudgetList(user?.primaryEmailAddress?.emailAddress)
+          }
+        />
+
         {loading
           ? placeholders.map((_, index) => (
               <div
@@ -59,8 +34,8 @@ function BudgetList() {
               ></div>
             ))
           : budgetList.length > 0
-          ? budgetList.map((budget, index) => (
-              <BudgetItem budget={budget} key={index} />
+          ? budgetList.map((budget) => (
+              <BudgetItem budget={budget} key={budget.id} />
             ))
           : !loading &&
             !error && (
@@ -69,6 +44,7 @@ function BudgetList() {
               </div>
             )}
       </div>
+
       {error && <div className='mt-4 text-red-600 text-center'>{error}</div>}
     </div>
   );
