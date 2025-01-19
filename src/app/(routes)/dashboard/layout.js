@@ -25,7 +25,7 @@ export default function DashboardLayout({ children }) {
     <>
       <Navbar />
       <SideNav />
-      <main>{children}</main>
+      <main className='mt-10'>{children}</main>
     </>
   );
 }

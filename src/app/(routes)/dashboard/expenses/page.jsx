@@ -34,10 +34,6 @@ function ExpensesScreen() {
           expensesList={expenseList}
         />
       )}
-
-      {expenseList.length === 0 && !loading && (
-        <p className='text-center text-gray-500'>No expenses found.</p>
-      )}
     </div>
   );
 }
