@@ -17,9 +17,11 @@ export default function DashboardLayout({ children }) {
     }
   }, [fetchBudgetList, user?.primaryEmailAddress?.emailAddress]);
 
-  if (budgetList.length === 0) {
-    router.replace('/dashboard/budgets');
-  }
+  useEffect(() => {
+    if (budgetList.length === 0) {
+      router.replace('/dashboard/budgets');
+    }
+  }, [budgetList, router]);
 
   return (
     <>

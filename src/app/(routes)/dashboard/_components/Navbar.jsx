@@ -7,7 +7,7 @@ import { ToggleMode } from '@/components/ToggleMode';
 import Link from 'next/link';
 
 export const Navbar = () => {
-  const { user, isSignedIn } = useUser();
+  const { isSignedIn } = useUser();
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {

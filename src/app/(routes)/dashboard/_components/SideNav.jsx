@@ -62,7 +62,7 @@ export function SideNav() {
     <Sheet>
       <SheetTrigger asChild>
         <div
-          className='fixed right-4 sm:right-10 top-4 sm:top-6 z-50 cursor-pointer py-2'
+          className='fixed right-4 sm:right-10 top-6 z-50 cursor-pointer'
           aria-label='Open navigation menu'
         >
           <PanelRight size={25} />
