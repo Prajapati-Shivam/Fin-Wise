@@ -25,7 +25,7 @@ function BudgetItem({ budget, refreshData }) {
               </h2>
             </div>
           </div>
-          <h2 className='font-bold text-primary text-lg'>${budget.amount}</h2>
+          <h2 className='font-bold text-primary text-lg'>₹{budget.amount}</h2>
         </div>
 
         {/* Progress Bar Section */}
