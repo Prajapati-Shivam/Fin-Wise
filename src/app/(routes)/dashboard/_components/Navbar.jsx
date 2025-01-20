@@ -24,7 +24,7 @@ export const Navbar = () => {
   }, []);
   return (
     <div
-      className={`fixed top-0 left-0 w-full shadow-md py-4 sm:py-6 px-4 sm:px-8 
+      className={`fixed top-0 left-0 w-full shadow-md py-4 px-4 sm:px-8 
       flex justify-between items-center z-50
         ${scrolled && 'bg-opacity-80 backdrop-filter backdrop-blur-md'} `}
     >

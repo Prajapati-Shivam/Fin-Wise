@@ -1,4 +1,5 @@
 'use client';
+
 import React, { useEffect } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
@@ -24,6 +25,9 @@ import {
 
 import { Button } from '@/components/ui/button';
 import useFinanceStore from '@/app/_store/financeStore';
+import { db } from '@/db';
+import { Expenses, Budgets } from '@/db/schema';
+import { eq } from 'drizzle-orm';
 
 function ExpensesScreen({ params }) {
   const { user } = useUser();
@@ -39,7 +43,7 @@ function ExpensesScreen({ params }) {
   } = useFinanceStore();
 
   const currentBudget = budgetList.find((budget) => budget.id == params.id);
-  // Fetch data on component mount or user change
+
   useEffect(() => {
     if (user) {
       fetchBudgetList(user.primaryEmailAddress.emailAddress);
@@ -47,7 +51,6 @@ function ExpensesScreen({ params }) {
     }
   }, [user, fetchBudgetList, fetchExpenseList]);
 
-  // Delete budget and related expenses
   const handleDeleteBudget = async () => {
     try {
       await db
@@ -92,8 +95,8 @@ function ExpensesScreen({ params }) {
               <AlertDialogHeader>
                 <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  This action cannot be undone. This will permanently delete the
-                  budget and all related expenses.
+                  This will permanently delete the budget and all related
+                  expenses.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
@@ -116,16 +119,22 @@ function ExpensesScreen({ params }) {
             rounded-lg animate-pulse'
           ></div>
         ) : currentBudget ? (
-          <BudgetItem budget={currentBudget} />
+          <BudgetItem
+            budget={currentBudget}
+            refreshData={() =>
+              fetchBudgetList(user.primaryEmailAddress.emailAddress)
+            }
+          />
         ) : (
           <div>No Budget Found</div>
         )}
         <AddExpense
           budgetId={params.id}
           user={user}
-          refreshData={() =>
-            fetchExpenseList(user.primaryEmailAddress.emailAddress)
-          }
+          refreshData={() => {
+            fetchExpenseList(user.primaryEmailAddress.emailAddress);
+            fetchBudgetList(user.primaryEmailAddress.emailAddress);
+          }}
         />
       </div>
       <div className='mt-4'>
@@ -136,9 +145,10 @@ function ExpensesScreen({ params }) {
             expensesList={expenseList.filter(
               (expense) => expense.budgetId == params.id
             )}
-            refreshData={() =>
-              fetchExpenseList(user.primaryEmailAddress.emailAddress)
-            }
+            refreshData={() => {
+              fetchExpenseList(user.primaryEmailAddress.emailAddress);
+              fetchBudgetList(user.primaryEmailAddress.emailAddress);
+            }}
           />
         )}
       </div>
