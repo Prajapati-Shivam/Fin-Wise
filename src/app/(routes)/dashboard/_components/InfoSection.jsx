@@ -6,33 +6,51 @@ import InfoCard from './InfoCard';
 import { PiggyBank, ReceiptText, Wallet, CircleDollarSign } from 'lucide-react';
 import useFinanceStore from '@/app/_store/financeStore';
 import { Button } from '@/components/ui/button';
+import getFinancialAdvice from '@/lib/getFinancialAdvice';
 import Link from 'next/link';
+
 const InfoSection = () => {
   const { user } = useUser();
+  const [loadingTotals, setLoadingTotals] = useState(true);
+  const [loadingAdvice, setLoadingAdvice] = useState(false);
+  const [financialAdvice, setFinancialAdvice] = useState('');
   const [totalIncome, setTotalIncome] = useState(0);
   const [totalBudget, setTotalBudget] = useState(0);
   const [totalSpend, setTotalSpend] = useState(0);
-  const [financialAdvice, setFinancialAdvice] = useState('');
-  const [loadingAdvice, setLoadingAdvice] = useState(false);
-  const { budgetList, incomeList, fetchBudgetList, fetchIncomeList } =
-    useFinanceStore();
 
+  const {
+    budgetList,
+    incomeList,
+    expenseList,
+    fetchBudgetList,
+    fetchExpenseList,
+    fetchIncomeList,
+  } = useFinanceStore();
+
+  // Fetch budgets and incomes when the user logs in
   useEffect(() => {
     if (user?.primaryEmailAddress?.emailAddress) {
       fetchBudgetList(user.primaryEmailAddress.emailAddress);
       fetchIncomeList(user.primaryEmailAddress.emailAddress);
+      fetchExpenseList(user.primaryEmailAddress.emailAddress);
     }
   }, [
     user?.primaryEmailAddress?.emailAddress,
     fetchBudgetList,
     fetchIncomeList,
+    fetchExpenseList,
   ]);
-  // Recalculate totals when budgetList or incomeList changes
+
+  // Calculate totals whenever budgetList or incomeList changes
   useEffect(() => {
-    if (budgetList.length > 0 || incomeList.length > 0) {
+    if (
+      (budgetList.length > 0 || incomeList.length > 0, expenseList.length > 0)
+    ) {
+      setLoadingTotals(true);
       calculateInfo();
+      setLoadingTotals(false);
     }
-  }, [budgetList, incomeList]);
+  }, [budgetList, incomeList, expenseList]);
 
   // Fetch financial advice when totals change
   useEffect(() => {
@@ -44,6 +62,7 @@ const InfoSection = () => {
           totalIncome,
           totalSpend
         );
+
         setFinancialAdvice(advice);
         setLoadingAdvice(false);
       }
@@ -52,7 +71,7 @@ const InfoSection = () => {
     fetchAdvice();
   }, [totalBudget, totalIncome, totalSpend]);
 
-  // Function to calculate totals
+  // Calculate totals for budget and income
   const calculateInfo = () => {
     let tBudget = 0;
     let tIncome = 0;
@@ -60,11 +79,14 @@ const InfoSection = () => {
 
     budgetList.forEach((budget) => {
       tBudget += Number(budget.amount || 0);
-      tSpend += Number(budget.tSpend || 0);
+    });
+
+    expenseList.forEach((expense) => {
+      tSpend += Number(expense.amount || 0);
     });
 
     incomeList.forEach((income) => {
-      tIncome += Number(income.totalAmount || 0);
+      tIncome += Number(income.amount || 0);
     });
 
     setTotalBudget(tBudget);
@@ -79,14 +101,24 @@ const InfoSection = () => {
           <div className='border p-5 mt-4 rounded-2xl flex items-center justify-between'>
             <div>
               <div className='flex mb-2 items-center space-x-1'>
-                <h3>FinWise AI</h3>
-                <Sparkle className='rounded-full size-10 text-white p-2 animated-background bg-gradient-to-r from-blue-500 via-blue-500 to-indigo-500' />
+                <h3 className='text-xl font-semibold'>FinWise AI</h3>
+                <Sparkle
+                  className={`rounded-full size-9 text-white p-2 animated-background bg-gradient-to-r from-blue-500 via-blue-500 to-indigo-500 ${
+                    loadingAdvice && 'animate-spin'
+                  }`}
+                />
               </div>
-              <p className='text-gray-600 text-lg'>
-                {loadingAdvice
-                  ? 'Fetching financial advice...'
-                  : financialAdvice || 'No advice available at the moment.'}
-              </p>
+              <div>
+                {loadingAdvice ? (
+                  <p className='text-gray-600 text-md'>
+                    Fetching financial advice...
+                  </p>
+                ) : (
+                  <p className='text-gray-500 text-md'>
+                    {financialAdvice || 'No financial advice at the moment.'}
+                  </p>
+                )}
+              </div>
             </div>
           </div>
           <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mt-4'>
@@ -113,14 +145,6 @@ const InfoSection = () => {
           </div>
         </div>
       ) : (
-        // <div className='mt-7 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5'>
-        //   {[1, 2, 3].map((item, index) => (
-        //     <div
-        //       className='h-[110px] w-full bg-slate-200 animate-pulse rounded-lg'
-        //       key={index}
-        //     ></div>
-        //   ))}
-        // </div>
         <div className='flex flex-col gap-4 mt-8 justify-center items-center border-2 py-5 rounded-2xl'>
           <div className='border-4 border-black dark:border-white p-4 rounded-full'>
             <PiggyBank className='size-14' />

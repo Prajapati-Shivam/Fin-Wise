@@ -10,11 +10,13 @@ const InfoCard = ({ amount, title, icon: Icon = PiggyBank }) => {
           {title}
         </h3>
         <div className='font-bold text-2xl text-gray-900 dark:text-white'>
-          ₹ {formatNumber(amount)}
+          {title == 'Number of Budgets'
+            ? `${formatNumber(amount)}`
+            : `₹${formatNumber(amount)}`}
         </div>
       </div>
-      <div className='flex items-center justify-center w-12 h-12 rounded-full text-white'>
-        <Icon size={24} />
+      <div className='flex items-center justify-center size-14 rounded-full bg-gradient-to-r from-blue-500 via-blue-500 to-indigo-500 text-white'>
+        <Icon size={30} />
       </div>
     </div>
   );
