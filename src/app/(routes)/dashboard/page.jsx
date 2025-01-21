@@ -7,6 +7,7 @@ import ExpenseListTable from './expenses/_components/ExpenseListTable';
 import useFinanceStore from '@/app/_store/financeStore';
 import { useEffect } from 'react';
 import BudgetItem from './budgets/_components/BudgetItem';
+import { Loader2 } from 'lucide-react';
 
 const Dashboard = () => {
   const { user, isLoaded } = useUser();
@@ -24,7 +25,12 @@ const Dashboard = () => {
   if (!isLoaded) {
     return (
       <div className='flex items-center justify-center h-screen'>
-        <p className='text-lg text-gray-600'>Loading...</p>
+        <p className='text-gray-600 dark:text-gray-400 text-lg flex items-center'>
+          <span>
+            <Loader2 size='24' className='animate-spin mr-2' />
+          </span>
+          Loading...
+        </p>
       </div>
     );
   }
@@ -35,19 +41,22 @@ const Dashboard = () => {
     <div className='px-8 py-10'>
       <h2 className='text-4xl font-bold'>Hi, {user?.fullName} 👋</h2>
       <p className='text-gray-600 dark:text-gray-400 mt-2'>
-        What's happening with your money? Let's manage your expenses.
+        {`What's happening with your money? Let's manage your expenses.`}
       </p>
 
       {/* Info Section */}
       <InfoSection />
 
       {/* Charts and Expense List */}
-      <div className='grid grid-cols-1 lg:grid-cols-3 mt-6 gap-5'>
+      <div className='mt-6 gap-5'>
         {/* Charts Section */}
         <div className='lg:col-span-2'>
           {loading ? (
             <div className='flex items-center justify-center h-40'>
-              <p className='text-gray-600 dark:text-gray-400'>
+              <p className='text-gray-600 dark:text-gray-400 text-lg flex items-center'>
+                <span>
+                  <Loader2 size='24' className='animate-spin mr-2' />
+                </span>
                 Loading charts...
               </p>
             </div>
@@ -55,13 +64,15 @@ const Dashboard = () => {
             <BarCharts budgetList={budgetList} />
           )}
         </div>
-
         {/* Expense List */}
-        <div className='lg:col-span-3'>
+        <div className='lg:col-span-3 border rounded-lg p-5'>
           {loading ? (
             <div className='flex items-center justify-center h-40'>
-              <p className='text-gray-600 dark:text-gray-400'>
-                Loading expenses...
+              <p className='text-gray-600 dark:text-gray-400 text-lg flex items-center'>
+                <span>
+                  <Loader2 size='24' className='animate-spin mr-2' />
+                </span>
+                Loading expense...
               </p>
             </div>
           ) : (
@@ -71,19 +82,25 @@ const Dashboard = () => {
             />
           )}
         </div>
-        <div className='grid gap-5'>
-          <h2 className='font-bold text-lg'>Latest Budgets</h2>
-          {budgetList?.length > 0
-            ? budgetList.map((budget, index) => (
-                <BudgetItem budget={budget} key={index} />
-              ))
-            : [1, 2, 3, 4].map((_, index) => (
-                <div
-                  key={index}
-                  className='h-[180xp] w-full
-                 bg-slate-200 rounded-lg animate-pulse'
-                ></div>
-              ))}
+        <div className='mt-7'>
+          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5'>
+            {loading
+              ? [1, 2, 3, 4].map((_, index) => (
+                  <div
+                    key={index}
+                    className='w-full bg-slate-200 dark:bg-slate-800 rounded-lg h-[150px] animate-pulse'
+                  ></div>
+                ))
+              : budgetList.length > 0
+              ? budgetList.map((budget) => (
+                  <BudgetItem budget={budget} key={budget.id} />
+                ))
+              : !loading && (
+                  <div className='w-full col-span-1 md:col-span-2 lg:col-span-3 text-center'>
+                    No budgets found. Start by creating one!
+                  </div>
+                )}
+          </div>
         </div>
       </div>
     </div>

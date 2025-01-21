@@ -1,5 +1,5 @@
 'use client';
-import { Sparkle } from 'lucide-react';
+import { Loader2, Sparkle } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 import { useUser } from '@clerk/nextjs';
 import InfoCard from './InfoCard';
@@ -97,8 +97,8 @@ const InfoSection = () => {
   return (
     <div>
       {budgetList.length > 0 ? (
-        <div>
-          <div className='border p-5 mt-4 rounded-2xl flex items-center justify-between'>
+        <div className='flex gap-5'>
+          <div className='border p-5 flex-1 mt-4 rounded-2xl flex items-center justify-between'>
             <div>
               <div className='flex mb-2 items-center space-x-1'>
                 <h3 className='text-xl font-semibold'>FinWise AI</h3>
@@ -110,7 +110,10 @@ const InfoSection = () => {
               </div>
               <div>
                 {loadingAdvice ? (
-                  <p className='text-gray-600 text-md'>
+                  <p className='text-gray-600 dark:text-gray-400 text-lg flex items-center'>
+                    <span>
+                      <Loader2 size='24' className='animate-spin mr-2' />
+                    </span>
                     Fetching financial advice...
                   </p>
                 ) : (
@@ -121,7 +124,7 @@ const InfoSection = () => {
               </div>
             </div>
           </div>
-          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mt-4'>
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-5 mt-4 flex-1'>
             <InfoCard
               title='Total Budget'
               amount={totalBudget}

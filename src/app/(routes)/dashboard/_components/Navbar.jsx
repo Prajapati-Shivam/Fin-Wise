@@ -39,7 +39,7 @@ export const Navbar = () => {
         {isSignedIn && (
           <>
             <Link href={'/dashboard'} className='hidden sm:block'>
-              <Button className='rounded-full'>Dashboard</Button>
+              <Button className='rounded-full font-bold'>Dashboard</Button>
             </Link>
             <UserButton />
           </>
