@@ -91,7 +91,7 @@ export function SideNav() {
             <SheetClose asChild key={item.id}>
               <Link
                 href={item.url}
-                className={`flex cursor-pointer items-center space-x-4 rounded-full p-4 m-3 transition-all duration-300 hover:font-bold hover:bg-slate-200 dark:hover:bg-slate-800 ${
+                className={`flex cursor-pointer items-center space-x-4 rounded-full p-4 transition-all duration-300 hover:font-bold hover:bg-slate-200 dark:hover:bg-slate-800 ${
                   path === item.url
                     ? 'font-bold bg-slate-400 dark:bg-slate-900'
                     : ''

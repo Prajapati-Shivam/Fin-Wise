@@ -97,8 +97,8 @@ const InfoSection = () => {
   return (
     <div>
       {budgetList.length > 0 ? (
-        <div className='flex gap-5'>
-          <div className='border p-5 flex-1 mt-4 rounded-2xl flex items-center justify-between'>
+        <div className='flex flex-col sm:flex-row gap-5 mt-4'>
+          <div className='border p-3 sm:p-5 flex-1 rounded-2xl flex items-center justify-between'>
             <div>
               <div className='flex mb-2 items-center space-x-1'>
                 <h3 className='text-xl font-semibold'>FinWise AI</h3>
@@ -124,7 +124,7 @@ const InfoSection = () => {
               </div>
             </div>
           </div>
-          <div className='grid grid-cols-1 md:grid-cols-2 gap-5 mt-4 flex-1'>
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-5 flex-1'>
             <InfoCard
               title='Total Budget'
               amount={totalBudget}

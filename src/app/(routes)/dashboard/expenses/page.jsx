@@ -22,7 +22,7 @@ function ExpensesScreen() {
     console.log('Error fetching expenses:', error);
   }
   return (
-    <div className='p-10'>
+    <div className='px-4 sm:px-8 py-10'>
       <h2 className='font-bold text-3xl mb-4'>My Expenses</h2>
 
       {loading ? (

@@ -3,7 +3,7 @@ import useFinanceStore from '@/app/_store/financeStore';
 import { db } from '@/db';
 import { Expenses } from '@/db/schema';
 import { eq } from 'drizzle-orm';
-import { Trash } from 'lucide-react';
+import { ReceiptText, Trash } from 'lucide-react';
 import React, { useState } from 'react';
 import { toast } from 'sonner';
 import {
@@ -15,6 +15,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
 
 function ExpenseListTable({ expensesList, refreshData }) {
   const { budgetList } = useFinanceStore();
@@ -85,9 +87,20 @@ function ExpenseListTable({ expensesList, refreshData }) {
         </Table>
       )}
       {expensesList.length === 0 && (
-        <p className='text-center text-gray-500'>
-          No expenses found. Start by adding one!
-        </p>
+        <div className='flex flex-col gap-4 mt-8 justify-center items-center border-2 py-5 rounded-2xl'>
+          <div className='border-4 border-black dark:border-white p-4 rounded-full'>
+            <ReceiptText className='size-14' />
+          </div>
+          <h3 className='font-semibold text-2xl'>No Expense found</h3>
+          <p className='text-gray-800 dark:text-gray-200 text-center'>
+            Get started by adding a new expense
+          </p>
+          <Link href={'/dashboard/budgets'}>
+            <Button variant='secondary' className='rounded-full'>
+              + New Expense
+            </Button>
+          </Link>
+        </div>
       )}
     </div>
   );

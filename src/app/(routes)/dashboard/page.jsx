@@ -38,7 +38,7 @@ const Dashboard = () => {
   const userEmail = user?.primaryEmailAddress?.emailAddress;
 
   return (
-    <div className='px-8 py-10'>
+    <div className='px-4 sm:px-8 py-10'>
       <h2 className='text-4xl font-bold'>Hi, {user?.fullName} 👋</h2>
       <p className='text-gray-600 dark:text-gray-400 mt-2'>
         {`What's happening with your money? Let's manage your expenses.`}
@@ -65,7 +65,7 @@ const Dashboard = () => {
           )}
         </div>
         {/* Expense List */}
-        <div className='lg:col-span-3 border rounded-lg p-5'>
+        <div className='lg:col-span-3 border rounded-lg mt-6 p-3 sm:p-5'>
           {loading ? (
             <div className='flex items-center justify-center h-40'>
               <p className='text-gray-600 dark:text-gray-400 text-lg flex items-center'>
