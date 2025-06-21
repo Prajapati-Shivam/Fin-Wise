@@ -6,7 +6,6 @@ import BarCharts from './_components/BarCharts';
 import ExpenseListTable from './expenses/_components/ExpenseListTable';
 import useFinanceStore from '@/app/_store/financeStore';
 import { useEffect } from 'react';
-import BudgetItem from './budgets/_components/BudgetItem';
 import { Loader2 } from 'lucide-react';
 
 const Dashboard = () => {
@@ -61,7 +60,7 @@ const Dashboard = () => {
               </p>
             </div>
           ) : (
-            <BarCharts budgetList={budgetList} />
+            <BarCharts budgetList={expenseList} />
           )}
         </div>
         {/* Expense List */}
@@ -81,26 +80,6 @@ const Dashboard = () => {
               expensesList={expenseList}
             />
           )}
-        </div>
-        <div className='mt-7'>
-          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5'>
-            {loading
-              ? [1, 2, 3, 4].map((_, index) => (
-                  <div
-                    key={index}
-                    className='w-full bg-slate-200 dark:bg-slate-800 rounded-lg h-[150px] animate-pulse'
-                  ></div>
-                ))
-              : budgetList.length > 0
-              ? budgetList.map((budget) => (
-                  <BudgetItem budget={budget} key={budget.id} />
-                ))
-              : !loading && (
-                  <div className='w-full col-span-1 md:col-span-2 lg:col-span-3 text-center'>
-                    No budgets found. Start by creating one!
-                  </div>
-                )}
-          </div>
         </div>
       </div>
     </div>

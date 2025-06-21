@@ -1,11 +1,11 @@
 {
-  "id": "b2ebb7db-b0e4-4667-914e-5df6b3224c34",
+  "id": "a438a6a1-d74c-489a-8c20-af05253e22d7",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
-    "public.budgets": {
-      "name": "budgets",
+    "public.category": {
+      "name": "category",
       "schema": "",
       "columns": {
         "id": {
@@ -16,12 +16,6 @@
         },
         "name": {
           "name": "name",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "amount": {
-          "name": "amount",
           "type": "varchar",
           "primaryKey": false,
           "notNull": true
@@ -69,8 +63,8 @@
           "primaryKey": false,
           "notNull": true
         },
-        "budgetId": {
-          "name": "budgetId",
+        "categoryId": {
+          "name": "categoryId",
           "type": "integer",
           "primaryKey": false,
           "notNull": false
@@ -84,12 +78,12 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "expenses_budgetId_budgets_id_fk": {
-          "name": "expenses_budgetId_budgets_id_fk",
+        "expenses_categoryId_category_id_fk": {
+          "name": "expenses_categoryId_category_id_fk",
           "tableFrom": "expenses",
-          "tableTo": "budgets",
+          "tableTo": "category",
           "columnsFrom": [
-            "budgetId"
+            "categoryId"
           ],
           "columnsTo": [
             "id"
@@ -98,49 +92,6 @@
           "onUpdate": "no action"
         }
       },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.incomes": {
-      "name": "incomes",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "name": {
-          "name": "name",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "amount": {
-          "name": "amount",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "icon": {
-          "name": "icon",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "createdBy": {
-          "name": "createdBy",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
