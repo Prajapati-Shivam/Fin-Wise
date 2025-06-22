@@ -7,15 +7,20 @@ import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 
 function ExpensesScreen() {
-  const { fetchExpenseList, fetchBudgetList, loading, expenseList, error } =
+  const { fetchCategoryList, fetchExpenseList, loading, expenseList, error } =
     useFinanceStore();
   const { user } = useUser();
 
   useEffect(() => {
     if (user?.primaryEmailAddress?.emailAddress) {
       fetchExpenseList(user.primaryEmailAddress.emailAddress);
+      fetchCategoryList(user.primaryEmailAddress.emailAddress);
     }
-  }, [fetchExpenseList, user?.primaryEmailAddress?.emailAddress]);
+  }, [
+    fetchExpenseList,
+    fetchCategoryList,
+    user?.primaryEmailAddress?.emailAddress,
+  ]);
 
   if (error) {
     toast.error('An error occurred while fetching expenses.');
@@ -35,7 +40,7 @@ function ExpensesScreen() {
       ) : (
         <ExpenseListTable
           refreshData={() =>
-            fetchBudgetList(user.primaryEmailAddress.emailAddress)
+            fetchExpenseList(user?.primaryEmailAddress?.emailAddress)
           }
           expensesList={expenseList}
         />

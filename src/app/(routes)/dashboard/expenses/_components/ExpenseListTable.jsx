@@ -19,12 +19,9 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 
 function ExpenseListTable({ expensesList, refreshData }) {
-  const { budgetList } = useFinanceStore();
   const [deletingId, setDeletingId] = useState(null);
-  const getBudgetName = (budgetId) => {
-    const budget = budgetList.find((budget) => budget.id == budgetId);
-    return budget?.name || 'Unknown';
-  };
+  const categoryList = useFinanceStore((state) => state.categoryList);
+
   const deleteExpense = async (expense) => {
     if (!expense?.id) return;
 
@@ -49,6 +46,10 @@ function ExpenseListTable({ expensesList, refreshData }) {
     }
   };
 
+  // Helper to get full category info
+  const getCategoryInfo = (categoryId) =>
+    categoryList.find((c) => c.id === categoryId);
+
   return (
     <div className='overflow-x-auto'>
       <h2 className='font-bold text-lg mb-4'>Latest Expenses</h2>
@@ -57,32 +58,44 @@ function ExpenseListTable({ expensesList, refreshData }) {
           <TableCaption>A list of your recent expenses.</TableCaption>
           <TableHeader>
             <TableRow>
-              <TableHead className='font-bold'>Budget</TableHead>
+              <TableHead className='font-bold'>Category</TableHead>
               <TableHead className='font-bold'>Expense</TableHead>
               <TableHead className='font-bold'>Amount</TableHead>
               <TableHead className='text-right font-bold'>Action</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {expensesList.map((expense) => (
-              <TableRow key={expense.id}>
-                <TableCell>{getBudgetName(expense.budgetId)}</TableCell>
-                <TableCell>{expense.name}</TableCell>
-                <TableCell>
-                  ₹ {Number(expense.amount).toLocaleString()}
-                </TableCell>
-                <TableCell className='float-end'>
-                  <Trash
-                    className={`text-red-500 cursor-pointer text-right ${
-                      deletingId == expense.id
-                        ? 'opacity-50 pointer-events-none'
-                        : ''
-                    }`}
-                    onClick={() => deleteExpense(expense)}
-                  />
-                </TableCell>
-              </TableRow>
-            ))}
+            {expensesList.map((expense) => {
+              const category = getCategoryInfo(expense.categoryId);
+              return (
+                <TableRow key={expense.id}>
+                  <TableCell>
+                    {category ? (
+                      <div className='flex items-center gap-2'>
+                        <span className='text-xl'>{category.icon}</span>
+                        <span>{category.name}</span>
+                      </div>
+                    ) : (
+                      <span className='text-gray-500 italic'>Unknown</span>
+                    )}
+                  </TableCell>
+                  <TableCell>{expense.name}</TableCell>
+                  <TableCell>
+                    ₹ {Number(expense.amount).toLocaleString()}
+                  </TableCell>
+                  <TableCell className='float-end'>
+                    <Trash
+                      className={`text-red-500 cursor-pointer text-right ${
+                        deletingId == expense.id
+                          ? 'opacity-50 pointer-events-none'
+                          : ''
+                      }`}
+                      onClick={() => deleteExpense(expense)}
+                    />
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       )}

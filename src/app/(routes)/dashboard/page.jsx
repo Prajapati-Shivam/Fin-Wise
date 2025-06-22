@@ -11,8 +11,7 @@ import { Loader2 } from 'lucide-react';
 const Dashboard = () => {
   const { user, isLoaded } = useUser();
   const router = useRouter();
-  const { budgetList, expenseList, fetchBudgetList, loading } =
-    useFinanceStore();
+  const { expenseList, fetchExpenseList, loading } = useFinanceStore();
 
   // Redirect to sign-in if the user is not logged in
   useEffect(() => {
@@ -49,7 +48,7 @@ const Dashboard = () => {
       {/* Charts and Expense List */}
       <div className='mt-6 gap-5'>
         {/* Charts Section */}
-        <div className='lg:col-span-2'>
+        {/* <div className='lg:col-span-2'>
           {loading ? (
             <div className='flex items-center justify-center h-40'>
               <p className='text-gray-600 dark:text-gray-400 text-lg flex items-center'>
@@ -62,7 +61,7 @@ const Dashboard = () => {
           ) : (
             <BarCharts budgetList={expenseList} />
           )}
-        </div>
+        </div> */}
         {/* Expense List */}
         <div className='lg:col-span-3 border rounded-lg mt-6 p-3 sm:p-5'>
           {loading ? (
@@ -76,7 +75,7 @@ const Dashboard = () => {
             </div>
           ) : (
             <ExpenseListTable
-              refreshData={() => fetchBudgetList(userEmail)}
+              refreshData={() => fetchExpenseList(userEmail)}
               expensesList={expenseList}
             />
           )}

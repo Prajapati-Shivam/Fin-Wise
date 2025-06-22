@@ -84,7 +84,7 @@ const useFinanceStore = create((set) => ({
         .select(getTableColumns(Expenses))
         .from(Expenses)
         .where(eq(Expenses.createdBy, userEmail))
-        .orderBy(desc(Expenses.id));
+        .orderBy(desc(Expenses.createdAt)); // ✅ updated
       set({ expenseList: result, loading: false });
     } catch (error) {
       console.error('Error fetching expense list:', error);

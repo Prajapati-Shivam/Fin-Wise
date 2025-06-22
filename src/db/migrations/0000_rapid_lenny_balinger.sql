@@ -1,16 +1,17 @@
 CREATE TABLE IF NOT EXISTS "category" (
-	"id" serial PRIMARY KEY NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"name" varchar NOT NULL,
 	"icon" varchar,
 	"createdBy" varchar NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "expenses" (
-	"id" serial PRIMARY KEY NOT NULL,
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"name" varchar NOT NULL,
 	"amount" varchar NOT NULL,
-	"categoryId" integer,
-	"createdBy" varchar NOT NULL
+	"categoryId" uuid,
+	"createdBy" varchar NOT NULL,
+	"createdAt" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 DO $$ BEGIN

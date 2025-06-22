@@ -2,12 +2,22 @@
 
 import * as React from 'react';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import {
   Drawer,
   DrawerClose,
   DrawerContent,
+  DrawerDescription,
   DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
   DrawerTrigger,
 } from '@/components/ui/drawer';
 import AddExpense from './AddExpense';
@@ -25,6 +35,12 @@ export function AddExpenseDialog() {
           </Button>
         </DialogTrigger>
         <DialogContent className='sm:max-w-[425px]'>
+          <DialogHeader>
+            <DialogTitle>Add Expense</DialogTitle>
+            <DialogDescription>
+              Add a new expense to track your spending
+            </DialogDescription>
+          </DialogHeader>
           <AddExpense />
         </DialogContent>
       </Dialog>
@@ -39,6 +55,12 @@ export function AddExpenseDialog() {
         </Button>
       </DrawerTrigger>
       <DrawerContent>
+        <DrawerHeader className='text-left'>
+          <DrawerTitle>Add Expense</DrawerTitle>
+          <DrawerDescription>
+            Add a new expense to track your spending
+          </DrawerDescription>
+        </DrawerHeader>
         <AddExpense />
         <DrawerFooter className='pt-2'>
           <DrawerClose asChild>

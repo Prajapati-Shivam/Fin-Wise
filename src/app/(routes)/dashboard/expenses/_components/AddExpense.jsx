@@ -7,15 +7,25 @@ import { Loader } from 'lucide-react';
 import React, { useState } from 'react';
 import { toast } from 'sonner';
 import { SelectCategory } from '../../category/_components/SelectCategory';
+import { useUser } from '@clerk/nextjs';
 
-function AddExpense() {
+function AddExpense({ refreshData }) {
   const [name, setName] = useState('');
   const [amount, setAmount] = useState('');
+  const [selectedCategoryId, setSelectedCategoryId] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  const { user } = useUser();
+
   const addNewExpense = async () => {
-    if (!name || !amount || isNaN(amount) || Number(amount) <= 0 || category) {
-      toast.error('Please provide a valid name and amount.');
+    if (
+      !name ||
+      !amount ||
+      isNaN(amount) ||
+      Number(amount) <= 0 ||
+      !selectedCategoryId
+    ) {
+      toast.error('Please fill out all fields and select a valid category.');
       return;
     }
 
@@ -26,16 +36,17 @@ function AddExpense() {
         .values({
           name: name.trim(),
           amount: Number(amount),
-          budgetId: budgetId,
+          categoryId: selectedCategoryId,
           createdBy: user?.primaryEmailAddress?.emailAddress,
         })
         .returning();
 
       if (result.length > 0) {
         toast.success('New Expense Added!');
-        refreshData();
+        refreshData?.();
         setName('');
         setAmount('');
+        setSelectedCategoryId(null);
       } else {
         toast.error('Failed to add expense. Please try again.');
       }
@@ -49,15 +60,14 @@ function AddExpense() {
 
   return (
     <div>
-      <h2 className='font-bold text-lg'>Add Expense</h2>
-      <div className='mt-2'>
+      <div>
         <h2 className='font-medium my-1'>Select Category</h2>
-        <SelectCategory />
+        <SelectCategory onChange={setSelectedCategoryId} />
       </div>
       <div className='mt-2'>
         <h2 className='font-medium my-1'>Expense Name</h2>
         <Input
-          placeholder='e.g. Bedroom Decor'
+          placeholder='e.g. Coffee, Groceries'
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
@@ -73,7 +83,13 @@ function AddExpense() {
       </div>
       <Button
         disabled={
-          !(name && amount && !isNaN(amount) && Number(amount) > 0) || loading
+          !(
+            name &&
+            amount &&
+            !isNaN(amount) &&
+            Number(amount) > 0 &&
+            selectedCategoryId
+          ) || loading
         }
         onClick={addNewExpense}
         className='mt-3 w-full rounded-full'
