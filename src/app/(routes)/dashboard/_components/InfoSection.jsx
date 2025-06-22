@@ -49,7 +49,6 @@ const InfoSection = () => {
     fetchAdvice();
   }, [totalSpend]);
 
-  // Calculate totals for budget and income
   const calculateInfo = () => {
     let tSpend = 0;
 
@@ -105,8 +104,8 @@ const InfoSection = () => {
           </div>
           <h3 className='font-semibold text-2xl'>No Expenses Found</h3>
           <p className='text-gray-800 dark:text-gray-200 text-center'>
-            It seems you haven't added any expenses yet. Start tracking your
-            expenses to get insights and financial advice.
+            It seems you haven&apos;t added any expenses yet. Start tracking
+            your expenses to get insights and financial advice.
           </p>
 
           <AddExpenseDialog />

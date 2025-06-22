@@ -4,7 +4,7 @@ import { db } from '@/db';
 import { Expenses } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { ReceiptText, Trash } from 'lucide-react';
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { toast } from 'sonner';
 import {
   Table,
@@ -17,14 +17,20 @@ import {
 } from '@/components/ui/table';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { Select } from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 
 function ExpenseListTable({ expensesList, refreshData }) {
   const [deletingId, setDeletingId] = useState(null);
-  const categoryList = useFinanceStore((state) => state.categoryList);
+  const [selectedCategoryId, setSelectedCategoryId] = useState('');
+  const [sortBy, setSortBy] = useState(null); // 'amount' | 'date'
+  const [sortOrder, setSortOrder] = useState('desc');
+
+  const { categoryList } = useFinanceStore();
 
   const deleteExpense = async (expense) => {
     if (!expense?.id) return;
-
     setDeletingId(expense.id);
     try {
       const result = await db
@@ -34,26 +40,85 @@ function ExpenseListTable({ expensesList, refreshData }) {
 
       if (result.length > 0) {
         toast.success('Expense Deleted!');
-        refreshData(); // Refresh the expense list after deletion
+        refreshData();
       } else {
-        toast.error('Failed to delete expense. Please try again.');
+        toast.error('Failed to delete expense.');
       }
     } catch (error) {
       console.error('Error deleting expense:', error);
       toast.error('An error occurred while deleting the expense.');
     } finally {
-      setDeletingId(null); // Reset the deleting ID
+      setDeletingId(null);
     }
   };
 
-  // Helper to get full category info
   const getCategoryInfo = (categoryId) =>
     categoryList.find((c) => c.id === categoryId);
 
+  const filteredExpenses = useMemo(() => {
+    let filtered = [...expensesList];
+    if (selectedCategoryId) {
+      filtered = filtered.filter((e) => e.categoryId === selectedCategoryId);
+    }
+
+    if (sortBy === 'amount') {
+      filtered.sort((a, b) =>
+        sortOrder === 'asc' ? a.amount - b.amount : b.amount - a.amount
+      );
+    }
+
+    if (sortBy === 'date') {
+      filtered.sort((a, b) =>
+        sortOrder === 'asc'
+          ? new Date(a.createdAt) - new Date(b.createdAt)
+          : new Date(b.createdAt) - new Date(a.createdAt)
+      );
+    }
+
+    return filtered;
+  }, [expensesList, selectedCategoryId, sortBy, sortOrder]);
+
   return (
     <div className='overflow-x-auto'>
-      <h2 className='font-bold text-lg mb-4'>Latest Expenses</h2>
-      {expensesList.length > 0 && (
+      <div className='flex flex-wrap gap-4 mb-4 items-center'>
+        <Select
+          onValueChange={(value) => setSelectedCategoryId(value)}
+          value={selectedCategoryId}
+        >
+          <option value=''>All Categories</option>
+          {categoryList.map((cat) => (
+            <option key={cat.id} value={cat.id}>
+              {cat.icon} {cat.name}
+            </option>
+          ))}
+        </Select>
+
+        <Button
+          variant='outline'
+          onClick={() => {
+            setSortBy('amount');
+            setSortOrder((prev) => (prev === 'asc' ? 'desc' : 'asc'));
+          }}
+        >
+          Sort by Amount{' '}
+          {sortBy === 'amount' &&
+            (sortOrder === 'asc' ? <ChevronUp /> : <ChevronDown />)}
+        </Button>
+
+        <Button
+          variant='outline'
+          onClick={() => {
+            setSortBy('date');
+            setSortOrder((prev) => (prev === 'asc' ? 'desc' : 'asc'));
+          }}
+        >
+          Sort by Date{' '}
+          {sortBy === 'date' &&
+            (sortOrder === 'asc' ? <ChevronUp /> : <ChevronDown />)}
+        </Button>
+      </div>
+
+      {filteredExpenses.length > 0 ? (
         <Table>
           <TableCaption>A list of your recent expenses.</TableCaption>
           <TableHeader>
@@ -61,19 +126,26 @@ function ExpenseListTable({ expensesList, refreshData }) {
               <TableHead className='font-bold'>Category</TableHead>
               <TableHead className='font-bold'>Expense</TableHead>
               <TableHead className='font-bold'>Amount</TableHead>
+              <TableHead className='font-bold'>Date</TableHead>
               <TableHead className='text-right font-bold'>Action</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {expensesList.map((expense) => {
+            {filteredExpenses.map((expense) => {
               const category = getCategoryInfo(expense.categoryId);
               return (
                 <TableRow key={expense.id}>
                   <TableCell>
                     {category ? (
-                      <div className='flex items-center gap-2'>
+                      <div
+                        className='flex items-center gap-2 group relative'
+                        title={`${category.percentage || 0}% of total`}
+                      >
                         <span className='text-xl'>{category.icon}</span>
                         <span>{category.name}</span>
+                        <div className='absolute -top-7 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs rounded py-1 px-2 opacity-0 group-hover:opacity-100 transition'>
+                          {category.percentage || '0.0'}% of spending
+                        </div>
                       </div>
                     ) : (
                       <span className='text-gray-500 italic'>Unknown</span>
@@ -83,9 +155,12 @@ function ExpenseListTable({ expensesList, refreshData }) {
                   <TableCell>
                     ₹ {Number(expense.amount).toLocaleString()}
                   </TableCell>
+                  <TableCell>
+                    {new Date(expense.createdAt).toLocaleDateString()}
+                  </TableCell>
                   <TableCell className='float-end'>
                     <Trash
-                      className={`text-red-500 cursor-pointer text-right ${
+                      className={`text-red-500 cursor-pointer ${
                         deletingId == expense.id
                           ? 'opacity-50 pointer-events-none'
                           : ''
@@ -98,8 +173,7 @@ function ExpenseListTable({ expensesList, refreshData }) {
             })}
           </TableBody>
         </Table>
-      )}
-      {expensesList.length === 0 && (
+      ) : (
         <div className='flex flex-col gap-4 mt-8 justify-center items-center border-2 py-5 rounded-2xl'>
           <div className='border-4 border-black dark:border-white p-4 rounded-full'>
             <ReceiptText className='size-14' />
@@ -108,7 +182,7 @@ function ExpenseListTable({ expensesList, refreshData }) {
           <p className='text-gray-800 dark:text-gray-200 text-center'>
             Get started by adding a new expense
           </p>
-          <Link href={'/dashboard/budgets'}>
+          <Link href={'/dashboard/expenses'}>
             <Button variant='secondary' className='rounded-full'>
               + New Expense
             </Button>

@@ -5,6 +5,7 @@ import { useUser } from '@clerk/nextjs';
 import useFinanceStore from '@/app/_store/financeStore';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
+import { AddExpenseDialog } from './_components/AddExpenseDialog';
 
 function ExpensesScreen() {
   const { fetchCategoryList, fetchExpenseList, loading, expenseList, error } =
@@ -28,7 +29,10 @@ function ExpensesScreen() {
   }
   return (
     <div className='px-4 sm:px-8 py-10'>
-      <h2 className='font-bold text-3xl mb-4'>My Expenses</h2>
+      <div className='flex flex-col sm:flex-row items-center justify-between'>
+        <h2 className='font-bold text-3xl mb-4'>My Expenses</h2>
+        <AddExpenseDialog />
+      </div>
 
       {loading ? (
         <p className='text-gray-600 dark:text-gray-400 text-lg flex items-center'>
