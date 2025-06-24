@@ -24,7 +24,14 @@ import AddExpense from './AddExpense';
 
 export function AddExpenseDialog() {
   const [open, setOpen] = React.useState(false);
-  const isDesktop = window.innerWidth >= 768;
+  const [isDesktop, setIsDesktop] = React.useState(false);
+
+  React.useEffect(() => {
+    const checkDesktop = () => setIsDesktop(window.innerWidth >= 768);
+    checkDesktop();
+    window.addEventListener('resize', checkDesktop);
+    return () => window.removeEventListener('resize', checkDesktop);
+  }, []);
 
   if (isDesktop) {
     return (

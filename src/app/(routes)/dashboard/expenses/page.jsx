@@ -6,6 +6,8 @@ import useFinanceStore from '@/app/_store/financeStore';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 import { AddExpenseDialog } from './_components/AddExpenseDialog';
+import { Switch } from '@/components/ui/switch';
+import { Input } from '@/components/ui/input';
 
 function ExpensesScreen() {
   const { fetchCategoryList, fetchExpenseList, loading, expenseList, error } =
@@ -29,9 +31,16 @@ function ExpensesScreen() {
   }
   return (
     <div className='px-4 sm:px-8 py-10'>
-      <div className='flex flex-col sm:flex-row items-center justify-between'>
-        <h2 className='font-bold text-3xl mb-4'>My Expenses</h2>
+      <div className='flex flex-col sm:flex-row sm:items-center justify-between py-2 sm:py-4'>
+        <h2 className='font-bold text-3xl'>My Expenses</h2>
+        <div className='flex items-center justify-between space-x-4'>
+          <p>Receive monthly Expense report</p>
+          <Switch />
+        </div>
+      </div>
+      <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-2 sm:py-4'>
         <AddExpenseDialog />
+        <Input type='text' placeholder='Search expenses...' />
       </div>
 
       {loading ? (

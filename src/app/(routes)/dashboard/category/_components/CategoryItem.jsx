@@ -1,9 +1,10 @@
 import React from 'react';
 import { ChartPie } from 'lucide-react';
+import { DeleteCategoryDialog } from './DeleteCategoryDialog';
 
 function CategoryItem({ category }) {
   return (
-    <div className='p-5 border rounded-2xl hover:shadow-md cursor-pointer h-[150px] flex flex-col justify-between'>
+    <div className='p-5 border rounded-2xl hover:shadow-md h-[150px] flex flex-col justify-between'>
       {/* Top: Icon and Name */}
       <div className='flex gap-2 items-center justify-between'>
         <div className='flex gap-2 items-center'>
@@ -26,11 +27,14 @@ function CategoryItem({ category }) {
       </div>
 
       {/* Bottom: Expense Amount */}
-      <div className='mt-4'>
-        <div className='text-sm text-muted-foreground'>Total Spent</div>
-        <div className='text-xl font-semibold text-gray-900 dark:text-white'>
-          ₹{category.totalExpenseAmount || 0}
+      <div className='mt-4 flex items-center justify-between'>
+        <div>
+          <div className='text-sm text-muted-foreground'>Total Spent</div>
+          <div className='text-xl font-semibold text-gray-900 dark:text-white'>
+            ₹{category.totalExpenseAmount || 0}
+          </div>
         </div>
+        <DeleteCategoryDialog category={category} />
       </div>
     </div>
   );

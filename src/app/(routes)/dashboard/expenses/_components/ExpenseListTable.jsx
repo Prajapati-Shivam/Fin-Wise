@@ -1,11 +1,8 @@
 'use client';
 import useFinanceStore from '@/app/_store/financeStore';
-import { db } from '@/db';
-import { Expenses } from '@/db/schema';
-import { eq } from 'drizzle-orm';
-import { ReceiptText, Trash } from 'lucide-react';
+
+import { ReceiptText } from 'lucide-react';
 import React, { useState, useMemo } from 'react';
-import { toast } from 'sonner';
 import {
   Table,
   TableBody,
@@ -17,48 +14,26 @@ import {
 } from '@/components/ui/table';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Select } from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
 import { ChevronDown, ChevronUp } from 'lucide-react';
+import { DeleteExpenseDialog } from './DeleteExpenseDialog';
 
-function ExpenseListTable({ expensesList, refreshData }) {
-  const [deletingId, setDeletingId] = useState(null);
+function ExpenseListTable({ expensesList }) {
   const [selectedCategoryId, setSelectedCategoryId] = useState('');
   const [sortBy, setSortBy] = useState(null); // 'amount' | 'date'
   const [sortOrder, setSortOrder] = useState('desc');
 
   const { categoryList } = useFinanceStore();
 
-  const deleteExpense = async (expense) => {
-    if (!expense?.id) return;
-    setDeletingId(expense.id);
-    try {
-      const result = await db
-        .delete(Expenses)
-        .where(eq(Expenses.id, expense.id))
-        .returning();
-
-      if (result.length > 0) {
-        toast.success('Expense Deleted!');
-        refreshData();
-      } else {
-        toast.error('Failed to delete expense.');
-      }
-    } catch (error) {
-      console.error('Error deleting expense:', error);
-      toast.error('An error occurred while deleting the expense.');
-    } finally {
-      setDeletingId(null);
-    }
-  };
-
   const getCategoryInfo = (categoryId) =>
     categoryList.find((c) => c.id === categoryId);
 
   const filteredExpenses = useMemo(() => {
     let filtered = [...expensesList];
+
     if (selectedCategoryId) {
-      filtered = filtered.filter((e) => e.categoryId === selectedCategoryId);
+      filtered = filtered.filter(
+        (e) => String(e.categoryId) === selectedCategoryId
+      );
     }
 
     if (sortBy === 'amount') {
@@ -81,17 +56,24 @@ function ExpenseListTable({ expensesList, refreshData }) {
   return (
     <div className='overflow-x-auto'>
       <div className='flex flex-wrap gap-4 mb-4 items-center'>
-        <Select
-          onValueChange={(value) => setSelectedCategoryId(value)}
-          value={selectedCategoryId}
-        >
-          <option value=''>All Categories</option>
+        <div className='flex flex-wrap gap-2 items-center p-3'>
+          <div>All Categories</div>
           {categoryList.map((cat) => (
-            <option key={cat.id} value={cat.id}>
+            <Button
+              key={cat.id}
+              variant={`${
+                selectedCategoryId === cat.id ? 'primary' : 'outline'
+              }`}
+              onClick={() => {
+                setSelectedCategoryId(
+                  selectedCategoryId === cat.id ? '' : cat.id
+                );
+              }}
+            >
               {cat.icon} {cat.name}
-            </option>
+            </Button>
           ))}
-        </Select>
+        </div>
 
         <Button
           variant='outline'
@@ -159,14 +141,7 @@ function ExpenseListTable({ expensesList, refreshData }) {
                     {new Date(expense.createdAt).toLocaleDateString()}
                   </TableCell>
                   <TableCell className='float-end'>
-                    <Trash
-                      className={`text-red-500 cursor-pointer ${
-                        deletingId == expense.id
-                          ? 'opacity-50 pointer-events-none'
-                          : ''
-                      }`}
-                      onClick={() => deleteExpense(expense)}
-                    />
+                    <DeleteExpenseDialog expense={expense} />
                   </TableCell>
                 </TableRow>
               );
