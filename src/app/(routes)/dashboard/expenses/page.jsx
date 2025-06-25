@@ -9,10 +9,20 @@ import { Loader2 } from 'lucide-react';
 import { AddExpenseDialog } from './_components/AddExpenseDialog';
 import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
-import TestDownload from './_components/test-download';
-import { ExpenseReportDocument } from './_components/ExpenseReportDocument';
-import { pdf } from '@react-pdf/renderer';
-import TestSendReport from './_components/TestSendReport';
+// import TestSendReport from './_components/TestSendReport';
+import dynamic from 'next/dynamic';
+// const TestDownload = dynamic(() => import('./_components/test-download'), {
+//   ssr: false,
+//   loading: () => <span>Loading Download...</span>,
+// });
+
+const DynamicExpenseReportDocument = dynamic(
+  () =>
+    import('./_components/ExpenseReportDocument').then(
+      (mod) => mod.ExpenseReportDocument
+    ),
+  { ssr: false }
+);
 
 function ExpensesScreen() {
   const {
@@ -76,7 +86,7 @@ function ExpensesScreen() {
       }
 
       const blob = await pdf(
-        <ExpenseReportDocument
+        <DynamicExpenseReportDocument
           expenseList={expenseList}
           categoryList={categoryList}
           userEmail={email}
@@ -128,11 +138,11 @@ function ExpensesScreen() {
       <div className='flex flex-col sm:flex-row sm:items-center justify-between py-2 sm:py-4'>
         <h2 className='font-bold text-3xl'>
           My Expenses
-          <TestSendReport
+          {/* <TestSendReport
             expenseList={expenseList}
             categoryList={categoryList}
             userEmail={user?.primaryEmailAddress?.emailAddress}
-          />
+          /> */}
         </h2>
         <div className='flex items-center justify-between space-x-4'>
           <div>
@@ -140,11 +150,11 @@ function ExpensesScreen() {
             <p className='text-xs text-muted-foreground'>
               Sends on 1st of each month
             </p>
-            <TestDownload
+            {/* <TestDownload
               expenseList={expenseList}
               categoryList={categoryList}
               userEmail={user?.primaryEmailAddress?.emailAddress}
-            />
+            /> */}
           </div>
           <Switch checked={receiveReport} onCheckedChange={handleToggle} />
         </div>
