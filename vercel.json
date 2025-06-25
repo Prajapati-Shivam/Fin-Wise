@@ -1,0 +1,8 @@
+{
+  "cron": [
+    {
+      "path": "/api/send-expense-report",
+      "schedule": "0 8 1 * *"
+    }
+  ]
+}
