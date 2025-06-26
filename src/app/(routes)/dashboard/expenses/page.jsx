@@ -162,7 +162,7 @@ function ExpensesScreen() {
 
       <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-2 sm:py-4'>
         <AddExpenseDialog />
-        <Input type='text' placeholder='Search expenses...' />
+        {/* <Input type='text' placeholder='Search expenses...' /> */}
       </div>
 
       {loading ? (

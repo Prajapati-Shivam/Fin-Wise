@@ -6,20 +6,13 @@ import React, { useState, useEffect } from 'react';
 import { ToggleMode } from '@/components/ToggleMode';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import {
-  LayoutDashboard,
-  Menu,
-  ReceiptText,
-  ScrollText,
-  X,
-} from 'lucide-react';
+import { LayoutDashboard, ReceiptText, ScrollText, X } from 'lucide-react';
 import { MobileNavMenu } from './MobileNavMenu';
 
 export const Navbar = () => {
   const { isSignedIn } = useUser();
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
 
   const links = [
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -58,7 +51,7 @@ export const Navbar = () => {
                 key={link.name}
                 href={link.href}
                 className={`font-medium transition hover:text-primary ${
-                  pathname.startsWith(link.href)
+                  pathname.endsWith(link.href)
                     ? 'text-primary font-bold'
                     : 'text-muted-foreground'
                 }`}

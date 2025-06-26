@@ -62,7 +62,7 @@ function ChartsSection({ expenseList, categoryList }) {
       {/* Bar Chart - Spending by Category */}
       <div className='border rounded-2xl p-3 sm:p-5'>
         <h2 className='font-bold text-lg mb-4'>Spending by Category</h2>
-        <ResponsiveContainer width='100%'>
+        <ResponsiveContainer width='100%' height={300}>
           <BarChart
             data={spendByCategory}
             margin={{ top: 20, right: 30, left: 10, bottom: 20 }}
@@ -80,7 +80,7 @@ function ChartsSection({ expenseList, categoryList }) {
       {/* Line Chart - Spending Over Time */}
       <div className='border rounded-2xl p-3 sm:p-5'>
         <h2 className='font-bold text-lg mb-4'>Spending Over Time</h2>
-        <ResponsiveContainer width='100%'>
+        <ResponsiveContainer width='100%' height={300}>
           <LineChart
             data={spendOverTime}
             margin={{ top: 20, right: 30, left: 10, bottom: 20 }}
@@ -106,7 +106,7 @@ function ChartsSection({ expenseList, categoryList }) {
         <h2 className='font-bold text-lg mb-4'>
           Category-wise Expense Distribution
         </h2>
-        <ResponsiveContainer width='100%'>
+        <ResponsiveContainer width='100%' height={300}>
           <PieChart>
             <Tooltip />
             <Legend verticalAlign='bottom' height={36} />

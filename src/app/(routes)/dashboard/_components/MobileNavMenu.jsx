@@ -21,7 +21,7 @@ export function MobileNavMenu({ links }) {
     <NavigationMenu className='sm:hidden'>
       <NavigationMenuList>
         <NavigationMenuItem>
-          <NavigationMenuTrigger className='px-4 py-2 text-base font-semibold rounded-md shadow-sm bg-muted hover:bg-muted/80'>
+          <NavigationMenuTrigger className='text-base font-semibold rounded-md'>
             Menu
           </NavigationMenuTrigger>
           <NavigationMenuContent className='bg-popover p-2 rounded-md shadow-lg'>
