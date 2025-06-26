@@ -1,46 +1,64 @@
-const { OpenAI } = require('openai');
-
-const api = new OpenAI({
-  baseURL: 'https://api.aimlapi.com',
-  apiKey: process.env.NEXT_PUBLIC_GEMINI_API_KEY,
-  dangerouslyAllowBrowser: true,
-});
-
+const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+// const apikey = 123;
 /**
- * Generates financial advice using the Gemini AI API.
- * @param {number} totalBudget - The user's total budget.
- * @param {number} totalIncome - The user's total income.
- * @param {number} totalSpend - The user's total spending.
- * @returns {Promise<string>} - A promise resolving to the financial advice string.
+ * Generates financial advice based on various expense metrics.
+ * @param {{
+ *   totalSpend: number;
+ *   averageDailySpend: number;
+ *   highestExpense: number;
+ *   expenseCount: number;
+ * }} data
+ * @returns {Promise<string>}
  */
-export default async function getFinancialAdvice(
-  totalBudget,
-  totalIncome,
-  totalSpend
-) {
+export default async function getFinancialAdvice({
+  totalSpend,
+  averageDailySpend,
+  highestExpense,
+  expenseCount,
+}) {
   try {
-    const result = await api.chat.completions.create({
-      model: 'google/gemma-2-27b-it',
-      messages: [
-        {
-          role: 'system',
-          content: 'You are an AI financial advisor.',
-        },
-        {
-          role: 'user',
-          content: `Based on the following financial data: Total Budget:${totalBudget}INR, Total Income:${totalIncome}INR, Total Spending:${totalSpend}INR. Provide concise financial advice in 2-3 sentences to help the user manage their finances effectively.`,
-        },
-      ],
-      temperature: 0.7,
-      max_tokens: 256,
-    });
+    const prompt = `A user has recorded the following spending stats:
+- Total Spend: ₹${totalSpend.toFixed(2)}
+- Average Daily Spend: ₹${averageDailySpend.toFixed(2)}
+- Highest Single Expense: ₹${highestExpense.toFixed(2)}
+- Total Number of Expenses: ${expenseCount}
 
-    // Extract the advice from the API response
-    const message = result.choices[0].message.content;
-    console.log(`Assistant: ${message}`);
-    return message;
+Based on this data, give 2–3 concise and practical financial advice points to help them manage spending better. Keep it actionable and easy to understand.(Within 70-80 words)`;
+
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              role: 'user',
+              parts: [
+                {
+                  text: prompt,
+                },
+              ],
+            },
+          ],
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(
+        `Gemini API error: ${response.status} ${response.statusText}`
+      );
+    }
+
+    const data = await response.json();
+
+    const advice = data.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
+    return advice;
   } catch (error) {
-    console.error('Error fetching financial advice:', error.message);
-    return 'Sorry, we could not fetch financial advice at this moment. Please try again later.';
+    console.error('❌ Error fetching financial advice:', error.message);
+    return 'Sorry, we could not fetch financial advice at the moment.';
   }
 }
