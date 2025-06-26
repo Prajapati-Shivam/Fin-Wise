@@ -68,7 +68,9 @@ export function AddExpenseDialog() {
             Add a new expense to track your spending
           </DrawerDescription>
         </DrawerHeader>
-        <AddExpense />
+        <div className='px-4'>
+          <AddExpense />
+        </div>
         <DrawerFooter className='pt-2'>
           <DrawerClose asChild>
             <Button variant='outline'>Cancel</Button>
