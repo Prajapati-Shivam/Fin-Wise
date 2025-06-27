@@ -55,25 +55,20 @@ function ExpenseListTable({ expensesList }) {
 
   return (
     <div className='overflow-x-auto'>
-      <div className='flex flex-wrap gap-4 mb-4 items-center'>
-        <div className='flex flex-wrap gap-2 items-center p-3'>
-          <div>All Categories</div>
-          {categoryList.map((cat) => (
-            <Button
-              key={cat.id}
-              variant={`${
-                selectedCategoryId === cat.id ? 'primary' : 'outline'
-              }`}
-              onClick={() => {
-                setSelectedCategoryId(
-                  selectedCategoryId === cat.id ? '' : cat.id
-                );
-              }}
-            >
-              {cat.icon} {cat.name}
-            </Button>
-          ))}
-        </div>
+      <div className='flex flex-wrap gap-4 my-4 items-center'>
+        {categoryList.map((cat) => (
+          <Button
+            key={cat.id}
+            variant={`${selectedCategoryId === cat.id ? 'outline' : 'primary'}`}
+            onClick={() => {
+              setSelectedCategoryId(
+                selectedCategoryId === cat.id ? '' : cat.id
+              );
+            }}
+          >
+            {cat.icon} {cat.name}
+          </Button>
+        ))}
 
         <Button
           variant='outline'
