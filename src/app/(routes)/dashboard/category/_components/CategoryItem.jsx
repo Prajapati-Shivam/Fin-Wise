@@ -1,8 +1,12 @@
 import React from 'react';
 import { ChartPie } from 'lucide-react';
 import { DeleteCategoryDialog } from './DeleteCategoryDialog';
+import useFinanceStore from '@/app/_store/financeStore';
+import { useUser } from '@clerk/nextjs';
 
 function CategoryItem({ category }) {
+  const { fetchCategoryList } = useFinanceStore();
+  const { user } = useUser();
   return (
     <div className='p-5 border rounded-2xl hover:shadow-md h-[150px] flex flex-col justify-between'>
       {/* Top: Icon and Name */}
@@ -34,7 +38,12 @@ function CategoryItem({ category }) {
             ₹{category.totalExpenseAmount || 0}
           </div>
         </div>
-        <DeleteCategoryDialog category={category} />
+        <DeleteCategoryDialog
+          category={category}
+          refreshData={() =>
+            fetchCategoryList(user?.primaryEmailAddress?.emailAddress)
+          }
+        />
       </div>
     </div>
   );

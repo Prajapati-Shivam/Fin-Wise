@@ -33,7 +33,7 @@ export function DeleteCategoryDialog({ category, refreshData }) {
 
       if (result.length > 0) {
         toast.success('Category Deleted!');
-        // refreshData();
+        refreshData();
       } else {
         toast.error('Failed to delete category.');
       }
