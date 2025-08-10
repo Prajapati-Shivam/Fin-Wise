@@ -13,7 +13,7 @@ import { Trash } from 'lucide-react';
 import { toast } from 'sonner';
 import { useState } from 'react';
 import { db } from '@/db';
-import { Category } from '@/db/schema';
+import { Category, Expenses } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 
 export function DeleteCategoryDialog({ category, refreshData }) {
@@ -23,6 +23,9 @@ export function DeleteCategoryDialog({ category, refreshData }) {
     if (!category?.id) return;
     setDeletingId(category.id);
     try {
+      // also delete all expenses associated with this category
+      await db.delete(Expenses).where(eq(Expenses.categoryId, category.id));
+
       const result = await db
         .delete(Category)
         .where(eq(Category.id, category.id))
@@ -30,7 +33,7 @@ export function DeleteCategoryDialog({ category, refreshData }) {
 
       if (result.length > 0) {
         toast.success('Category Deleted!');
-        refreshData();
+        // refreshData();
       } else {
         toast.error('Failed to delete category.');
       }
