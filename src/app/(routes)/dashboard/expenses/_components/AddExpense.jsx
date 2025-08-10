@@ -9,7 +9,7 @@ import { toast } from 'sonner';
 import { SelectCategory } from '../../category/_components/SelectCategory';
 import { useUser } from '@clerk/nextjs';
 
-function AddExpense({ refreshData }) {
+function AddExpense({ onSuccess }) {
   const [name, setName] = useState('');
   const [amount, setAmount] = useState('');
   const [selectedCategoryId, setSelectedCategoryId] = useState(null);
@@ -43,10 +43,11 @@ function AddExpense({ refreshData }) {
 
       if (result.length > 0) {
         toast.success('New Expense Added!');
-        refreshData?.();
         setName('');
         setAmount('');
         setSelectedCategoryId(null);
+
+        if (onSuccess) onSuccess();
       } else {
         toast.error('Failed to add expense. Please try again.');
       }

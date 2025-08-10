@@ -22,7 +22,7 @@ import {
 } from '@/components/ui/drawer';
 import AddExpense from './AddExpense';
 
-export function AddExpenseDialog() {
+export function AddExpenseDialog({ refreshData }) {
   const [open, setOpen] = React.useState(false);
   const [isDesktop, setIsDesktop] = React.useState(false);
 
@@ -48,7 +48,12 @@ export function AddExpenseDialog() {
               Add a new expense to track your spending
             </DialogDescription>
           </DialogHeader>
-          <AddExpense />
+          <AddExpense
+            onSuccess={() => {
+              refreshData();
+              setOpen(false);
+            }}
+          />
         </DialogContent>
       </Dialog>
     );
@@ -69,7 +74,12 @@ export function AddExpenseDialog() {
           </DrawerDescription>
         </DrawerHeader>
         <div className='px-4'>
-          <AddExpense />
+          <AddExpense
+            onSuccess={() => {
+              refreshData();
+              setOpen(false);
+            }}
+          />
         </div>
         <DrawerFooter className='pt-2'>
           <DrawerClose asChild>

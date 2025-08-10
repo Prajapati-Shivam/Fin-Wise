@@ -161,7 +161,11 @@ function ExpensesScreen() {
       </div>
 
       <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-2 sm:py-4'>
-        <AddExpenseDialog />
+        <AddExpenseDialog
+          refreshData={() =>
+            fetchExpenseList(user?.primaryEmailAddress?.emailAddress)
+          }
+        />
         {/* <Input type='text' placeholder='Search expenses...' /> */}
       </div>
 
