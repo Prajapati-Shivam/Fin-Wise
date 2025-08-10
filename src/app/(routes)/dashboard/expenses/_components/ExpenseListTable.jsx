@@ -16,13 +16,14 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { DeleteExpenseDialog } from './DeleteExpenseDialog';
+import { useUser } from '@clerk/nextjs';
 
 function ExpenseListTable({ expensesList }) {
   const [selectedCategoryId, setSelectedCategoryId] = useState('');
   const [sortBy, setSortBy] = useState(null); // 'amount' | 'date'
   const [sortOrder, setSortOrder] = useState('desc');
-
-  const { categoryList } = useFinanceStore();
+  const { user } = useUser();
+  const { categoryList, fetchExpenseList } = useFinanceStore();
 
   const getCategoryInfo = (categoryId) =>
     categoryList.find((c) => c.id === categoryId);
@@ -136,7 +137,14 @@ function ExpenseListTable({ expensesList }) {
                     {new Date(expense.createdAt).toLocaleDateString()}
                   </TableCell>
                   <TableCell className='float-end'>
-                    <DeleteExpenseDialog expense={expense} />
+                    <DeleteExpenseDialog
+                      expense={expense}
+                      refreshData={() =>
+                        fetchExpenseList(
+                          user?.primaryEmailAddress?.emailAddress
+                        )
+                      }
+                    />
                   </TableCell>
                 </TableRow>
               );
