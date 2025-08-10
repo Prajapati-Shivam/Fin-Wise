@@ -10,10 +10,12 @@ async function blobToBuffer(blob) {
 
 export async function POST(req) {
   try {
-    if (
-      req.headers.get('Authorization') !== `Bearer ${process.env.CRON_SECRET}`
-    ) {
-      return res.status(401).end('Unauthorized');
+    if (process.env.NODE_ENV !== 'development') {
+      if (
+        req.headers.get('Authorization') !== `Bearer ${process.env.CRON_SECRET}`
+      ) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      }
     }
 
     const formData = await req.formData();
@@ -38,14 +40,14 @@ export async function POST(req) {
       from: 'FinWise <onboarding@resend.dev>', // Replace with your verified sender
       to: email,
       subject: 'Your Monthly Expense Report',
-      text: `
-        Hello,
-
-        Attached is your monthly expense report in PDF format.
-
-        Don't need to receive reports anymore?
-        Unsubscribe here: ${unsubscribeUrl}
-      `.trim(),
+      text: [
+        'Hello,',
+        '',
+        'Attached is your monthly expense report in PDF format.',
+        '',
+        "Don't need to receive reports anymore?",
+        `Unsubscribe here: ${unsubscribeUrl}`,
+      ].join('\n'),
       attachments: [
         {
           filename: fileName,
@@ -62,4 +64,12 @@ export async function POST(req) {
       { status: 500 }
     );
   }
+}
+
+// GET handler for quick testing (mock data)
+export async function GET() {
+  // Mock run — no PDF, just returns success
+  return NextResponse.json({
+    message: 'Cron job test successful — POST endpoint is ready.',
+  });
 }
