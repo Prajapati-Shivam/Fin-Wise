@@ -1,6 +1,6 @@
-import { db } from '@db';
+import { db } from '@/db';
 import { eq } from 'drizzle-orm';
-import { Expenses, Category, Users } from '@db/schema';
+import { Expenses, Category, Users } from '@/db/schema';
 
 // 1. Get all users who opted in for monthly reports
 export async function getAllOptedInUsers() {
