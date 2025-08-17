@@ -24,3 +24,16 @@ export async function ensureUser(email) {
 
   return existingUser;
 }
+
+// update user preference for receiving reports
+export async function updateReceiveReport(userId, receiveReport) {
+  if (!userId) return;
+
+  const updatedUser = await db
+    .update(Users)
+    .set({ receiveReport })
+    .where(eq(Users.id, userId))
+    .returning();
+
+  return updatedUser;
+}

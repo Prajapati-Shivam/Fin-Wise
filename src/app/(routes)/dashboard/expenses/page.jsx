@@ -8,9 +8,9 @@ import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 import { AddExpenseDialog } from './_components/AddExpenseDialog';
 import { Switch } from '@/components/ui/switch';
-import { Input } from '@/components/ui/input';
 // import TestSendReport from './_components/TestSendReport';
 import dynamic from 'next/dynamic';
+import { updateReceiveReport } from '@/app/action/user';
 // const TestDownload = dynamic(() => import('./_components/test-download'), {
 //   ssr: false,
 //   loading: () => <span>Loading Download...</span>,
@@ -27,6 +27,7 @@ const DynamicExpenseReportDocument = dynamic(
 function ExpensesScreen() {
   const {
     currentUser,
+    fetchCurrentUser,
     fetchCategoryList,
     fetchExpenseList,
     loading,
@@ -34,38 +35,46 @@ function ExpensesScreen() {
     expenseList,
     error,
   } = useFinanceStore();
-  const { user } = useUser();
 
+  const { user } = useUser();
   const email = user?.primaryEmailAddress?.emailAddress;
   const [receiveReport, setReceiveReport] = useState(false);
-  // Load initial value from localStorage on mount
-  useEffect(() => {
-    const stored = localStorage.getItem('receiveMonthlyReport');
-    if (stored !== null) {
-      setReceiveReport(stored === 'true');
-    }
-  }, []);
 
-  // Save switch toggle to localStorage
-  const handleToggle = (checked) => {
-    setReceiveReport(checked);
-    localStorage.setItem('receiveMonthlyReport', checked.toString());
-  };
-
-  // Fetch user-specific data
   useEffect(() => {
     if (email) {
-      fetchExpenseList(currentUser?.id);
-      fetchCategoryList(currentUser?.id);
+      fetchCurrentUser(email);
     }
-  }, [fetchExpenseList, fetchCategoryList, currentUser?.id, email]);
+  }, [email, fetchCurrentUser]);
+
+  useEffect(() => {
+    if (currentUser) {
+      setReceiveReport(currentUser.receiveReport ?? false);
+      fetchExpenseList(currentUser.id);
+      fetchCategoryList(currentUser.id);
+    }
+  }, [currentUser, fetchExpenseList, fetchCategoryList]);
+
+  const handleToggle = async (checked) => {
+    setReceiveReport(checked);
+
+    try {
+      const res = await updateReceiveReport(currentUser.id, checked);
+
+      if (checked) {
+        toast.success('You will now receive monthly reports.');
+      } else {
+        toast.success('You have unsubscribed from monthly reports.');
+      }
+    } catch (err) {
+      console.error('Error updating preference:', err);
+      toast.error('Error updating preference.');
+    }
+  };
 
   // Send PDF on 1st of the month if enabled
   useEffect(() => {
     const sendMonthlyReportIfNeeded = async () => {
-      const isEnabled = localStorage.getItem('receiveMonthlyReport');
-
-      if (isEnabled !== 'true' || !email) return;
+      if (!receiveReport || !email) return;
 
       const today = new Date();
       if (today.getDate() !== 1) return;
@@ -78,7 +87,7 @@ function ExpensesScreen() {
         lastSentDate.getFullYear() === today.getFullYear() &&
         lastSentDate.getMonth() === today.getMonth()
       ) {
-        return;
+        return; // already sent this month
       }
 
       const blob = await pdf(
@@ -119,10 +128,10 @@ function ExpensesScreen() {
       }
     };
 
-    if (expenseList.length > 0 && categoryList.length > 0 && user) {
+    if (expenseList.length > 0 && categoryList.length > 0 && currentUser) {
       sendMonthlyReportIfNeeded();
     }
-  }, [expenseList, categoryList, user, email]);
+  }, [expenseList, categoryList, currentUser, email, receiveReport]);
 
   if (error) {
     toast.error('An error occurred while fetching expenses.');

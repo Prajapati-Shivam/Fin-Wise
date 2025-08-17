@@ -56,8 +56,8 @@ export async function GET() {
     const results = [];
 
     for (const user of users) {
-      const expenseList = await getExpensesForUser(user.email);
-      const categoryList = await getCategoriesForUser(user.email);
+      const expenseList = await getExpensesForUser(user.id);
+      const categoryList = await getCategoriesForUser(user.id);
 
       const res = await sendExpenseReport({
         email: user.email,
