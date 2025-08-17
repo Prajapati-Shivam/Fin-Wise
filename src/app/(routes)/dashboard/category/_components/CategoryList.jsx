@@ -6,22 +6,23 @@ import CategoryItem from './CategoryItem';
 import { CreateCategoryDialog } from './CreateCategoryDialog';
 
 function CategoryList() {
-  const { categoryList, fetchCategoryList, fetchExpenseList, loading, error } =
-    useFinanceStore();
-
-  const { user } = useUser();
-
-  useEffect(() => {
-    const userEmail = user?.primaryEmailAddress?.emailAddress;
-    if (userEmail) {
-      fetchCategoryList(userEmail);
-      fetchExpenseList(userEmail); // optional, useful elsewhere
-    }
-  }, [
-    user?.primaryEmailAddress?.emailAddress,
+  const {
+    currentUser,
+    categoryList,
     fetchCategoryList,
     fetchExpenseList,
-  ]);
+    loading,
+    error,
+  } = useFinanceStore();
+
+  const { user } = useUser();
+  const userEmail = user?.primaryEmailAddress?.emailAddress;
+  useEffect(() => {
+    if (userEmail) {
+      fetchCategoryList(currentUser?.id);
+      fetchExpenseList(currentUser?.id);
+    }
+  }, [fetchCategoryList, fetchExpenseList, currentUser?.id, userEmail]);
 
   const placeholders = Array.from({ length: 5 });
 
@@ -29,9 +30,7 @@ function CategoryList() {
     <div className='mt-7'>
       <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5'>
         <CreateCategoryDialog
-          refresh={() =>
-            fetchCategoryList(user?.primaryEmailAddress?.emailAddress)
-          }
+          refresh={() => fetchCategoryList(currentUser?.id)}
         />
 
         {loading
@@ -42,15 +41,15 @@ function CategoryList() {
               ></div>
             ))
           : categoryList.length > 0
-          ? categoryList.map((category) => (
-              <CategoryItem key={category.id} category={category} />
-            ))
-          : !loading &&
-            !error && (
-              <div className='w-full col-span-1 md:col-span-2 lg:col-span-3 text-center'>
-                <p className='text-gray-500'>No categories available</p>
-              </div>
-            )}
+            ? categoryList.map((category) => (
+                <CategoryItem key={category.id} category={category} />
+              ))
+            : !loading &&
+              !error && (
+                <div className='w-full col-span-1 md:col-span-2 lg:col-span-3 text-center'>
+                  <p className='text-gray-500'>No categories available</p>
+                </div>
+              )}
       </div>
 
       {error && <div className='mt-4 text-red-600 text-center'>{error}</div>}

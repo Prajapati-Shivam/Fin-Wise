@@ -23,7 +23,7 @@ function ExpenseListTable({ expensesList }) {
   const [sortBy, setSortBy] = useState(null); // 'amount' | 'date'
   const [sortOrder, setSortOrder] = useState('desc');
   const { user } = useUser();
-  const { categoryList, fetchExpenseList } = useFinanceStore();
+  const { currentUser, categoryList, fetchExpenseList } = useFinanceStore();
 
   const getCategoryInfo = (categoryId) =>
     categoryList.find((c) => c.id === categoryId);
@@ -139,11 +139,7 @@ function ExpenseListTable({ expensesList }) {
                   <TableCell className='float-end'>
                     <DeleteExpenseDialog
                       expense={expense}
-                      refreshData={() =>
-                        fetchExpenseList(
-                          user?.primaryEmailAddress?.emailAddress
-                        )
-                      }
+                      refreshData={() => fetchExpenseList(currentUser?.id)}
                     />
                   </TableCell>
                 </TableRow>

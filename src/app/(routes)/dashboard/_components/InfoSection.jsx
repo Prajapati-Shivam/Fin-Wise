@@ -30,19 +30,17 @@ const InfoSection = () => {
   const [highestExpense, setHighestExpense] = useState(0);
   const [expenseCount, setExpenseCount] = useState(0);
 
-  const { expenseList, fetchExpenseList, fetchCategoryList } =
+  const { currentUser, expenseList, fetchExpenseList, fetchCategoryList } =
     useFinanceStore();
 
+  const userEmail = user?.primaryEmailAddress?.emailAddress;
+
   useEffect(() => {
-    if (user?.primaryEmailAddress?.emailAddress) {
-      fetchExpenseList(user.primaryEmailAddress.emailAddress);
-      fetchCategoryList(user.primaryEmailAddress.emailAddress);
+    if (userEmail) {
+      fetchExpenseList(currentUser?.id);
+      fetchCategoryList(currentUser?.id);
     }
-  }, [
-    user?.primaryEmailAddress?.emailAddress,
-    fetchExpenseList,
-    fetchCategoryList,
-  ]);
+  }, [fetchExpenseList, fetchCategoryList, currentUser?.id, userEmail]);
 
   useEffect(() => {
     if (expenseList.length > 0) {

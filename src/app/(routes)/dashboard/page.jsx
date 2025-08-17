@@ -10,19 +10,43 @@ import { AddExpenseDialog } from './expenses/_components/AddExpenseDialog';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import ChartsSection from './_components/ChartsSection';
+import { ensureUser } from '@/app/action/user';
 
 const Dashboard = () => {
   const { user, isLoaded } = useUser();
+  const userEmail = user?.primaryEmailAddress?.emailAddress;
   const router = useRouter();
-  const { expenseList, categoryList, fetchExpenseList, loading } =
-    useFinanceStore();
+  const {
+    currentUser,
+    expenseList,
+    categoryList,
+    fetchExpenseList,
+    fetchCurrentUser,
+    loading,
+  } = useFinanceStore();
 
+  console.log('Current User:', currentUser);
   // Redirect to sign-in if the user is not logged in
   useEffect(() => {
     if (isLoaded && !user) {
       router.push('/sign-in');
     }
   }, [isLoaded, user, router]);
+
+  useEffect(() => {
+    const saveUser = async () => {
+      if (user?.primaryEmailAddress) {
+        await ensureUser(userEmail);
+      }
+    };
+    saveUser();
+  }, [user, userEmail]);
+
+  useEffect(() => {
+    if (userEmail) {
+      fetchCurrentUser(userEmail);
+    }
+  }, [fetchCurrentUser, userEmail]);
 
   if (!isLoaded) {
     return (
@@ -36,8 +60,6 @@ const Dashboard = () => {
       </div>
     );
   }
-
-  const userEmail = user?.primaryEmailAddress?.emailAddress;
 
   return (
     <div className='px-4 sm:px-8 py-10'>
@@ -90,7 +112,7 @@ const Dashboard = () => {
             </div>
           ) : (
             <ExpenseListTable
-              refreshData={() => fetchExpenseList(userEmail)}
+              refreshData={() => fetchExpenseList(currentUser?.id)}
               expensesList={expenseList}
             />
           )}

@@ -5,14 +5,36 @@ import { Category, Expenses } from '@/db/schema';
 
 const useFinanceStore = create((set) => ({
   // States for category and expense lists
+  currentUser: null,
   categoryList: [],
   expenseList: [],
   loading: false,
   error: null,
 
-  // Fetch category list
-  fetchCategoryList: async (userEmail) => {
+  // fetch current user and return userid
+  fetchCurrentUser: async (userEmail) => {
     if (!userEmail) return;
+
+    set({ loading: true, error: null });
+
+    try {
+      const user = await db.query.Users.findFirst({
+        where: (users, { eq }) => eq(users.email, userEmail),
+      });
+      if (user) {
+        set({ currentUser: user, loading: false });
+      } else {
+        set({ currentUser: null, loading: false });
+      }
+    } catch (error) {
+      console.error('Error fetching current user:', error);
+      set({ error: 'Failed to fetch user', loading: false });
+    }
+  },
+
+  // Fetch category list
+  fetchCategoryList: async (userId) => {
+    if (!userId) return;
 
     set({ loading: true, error: null });
 
@@ -21,7 +43,7 @@ const useFinanceStore = create((set) => ({
       const categories = await db
         .select(getTableColumns(Category))
         .from(Category)
-        .where(eq(Category.createdBy, userEmail))
+        .where(eq(Category.createdBy, userId))
         .orderBy(desc(Category.id));
 
       // 2. Fetch all expenses (to group by category)
@@ -31,7 +53,7 @@ const useFinanceStore = create((set) => ({
           amount: Expenses.amount,
         })
         .from(Expenses)
-        .where(eq(Expenses.createdBy, userEmail));
+        .where(eq(Expenses.userId, userId));
 
       // 3. Calculate total spending
       const totalSpending = allExpenses.reduce(
@@ -75,16 +97,16 @@ const useFinanceStore = create((set) => ({
   setCategoryList: (newCategoryList) => set({ categoryList: newCategoryList }),
 
   // Fetch expense list
-  fetchExpenseList: async (userEmail) => {
-    if (!userEmail) return;
+  fetchExpenseList: async (userId) => {
+    if (!userId) return;
 
     set({ loading: true, error: null });
     try {
       const result = await db
         .select(getTableColumns(Expenses))
         .from(Expenses)
-        .where(eq(Expenses.createdBy, userEmail))
-        .orderBy(desc(Expenses.createdAt)); // ✅ updated
+        .where(eq(Expenses.userId, userId))
+        .orderBy(desc(Expenses.createdAt));
       set({ expenseList: result, loading: false });
     } catch (error) {
       console.error('Error fetching expense list:', error);

@@ -26,6 +26,7 @@ const DynamicExpenseReportDocument = dynamic(
 
 function ExpensesScreen() {
   const {
+    currentUser,
     fetchCategoryList,
     fetchExpenseList,
     loading,
@@ -35,8 +36,8 @@ function ExpensesScreen() {
   } = useFinanceStore();
   const { user } = useUser();
 
+  const email = user?.primaryEmailAddress?.emailAddress;
   const [receiveReport, setReceiveReport] = useState(false);
-
   // Load initial value from localStorage on mount
   useEffect(() => {
     const stored = localStorage.getItem('receiveMonthlyReport');
@@ -53,22 +54,17 @@ function ExpensesScreen() {
 
   // Fetch user-specific data
   useEffect(() => {
-    const email = user?.primaryEmailAddress?.emailAddress;
     if (email) {
-      fetchExpenseList(email);
-      fetchCategoryList(email);
+      fetchExpenseList(currentUser?.id);
+      fetchCategoryList(currentUser?.id);
     }
-  }, [
-    fetchExpenseList,
-    fetchCategoryList,
-    user?.primaryEmailAddress?.emailAddress,
-  ]);
+  }, [fetchExpenseList, fetchCategoryList, currentUser?.id, email]);
 
   // Send PDF on 1st of the month if enabled
   useEffect(() => {
     const sendMonthlyReportIfNeeded = async () => {
       const isEnabled = localStorage.getItem('receiveMonthlyReport');
-      const email = user?.primaryEmailAddress?.emailAddress;
+
       if (isEnabled !== 'true' || !email) return;
 
       const today = new Date();
@@ -126,7 +122,7 @@ function ExpensesScreen() {
     if (expenseList.length > 0 && categoryList.length > 0 && user) {
       sendMonthlyReportIfNeeded();
     }
-  }, [expenseList, categoryList, user]);
+  }, [expenseList, categoryList, user, email]);
 
   if (error) {
     toast.error('An error occurred while fetching expenses.');
@@ -162,9 +158,7 @@ function ExpensesScreen() {
 
       <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-2 sm:py-4'>
         <AddExpenseDialog
-          refreshData={() =>
-            fetchExpenseList(user?.primaryEmailAddress?.emailAddress)
-          }
+          refreshData={() => fetchExpenseList(currentUser?.id)}
         />
         {/* <Input type='text' placeholder='Search expenses...' /> */}
       </div>
@@ -178,9 +172,7 @@ function ExpensesScreen() {
         </p>
       ) : (
         <ExpenseListTable
-          refreshData={() =>
-            fetchExpenseList(user?.primaryEmailAddress?.emailAddress)
-          }
+          refreshData={() => fetchExpenseList(currentUser?.id)}
           expensesList={expenseList}
         />
       )}

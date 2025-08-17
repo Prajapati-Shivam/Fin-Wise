@@ -14,15 +14,18 @@ import {
 import useFinanceStore from '@/app/_store/financeStore';
 
 export function SelectCategory({ onChange }) {
-  const fetchCategoryList = useFinanceStore((state) => state.fetchCategoryList);
-  const categoryList = useFinanceStore((state) => state.categoryList);
+  const { currentUser, categoryList, fetchCategoryList } = useFinanceStore();
   const { user } = useUser();
 
   useEffect(() => {
     if (user?.primaryEmailAddress?.emailAddress) {
-      fetchCategoryList(user.primaryEmailAddress.emailAddress);
+      fetchCategoryList(currentUser?.id);
     }
-  }, [user?.primaryEmailAddress?.emailAddress, fetchCategoryList]);
+  }, [
+    fetchCategoryList,
+    currentUser?.id,
+    user?.primaryEmailAddress?.emailAddress,
+  ]);
 
   return (
     <Select onValueChange={onChange}>
@@ -33,7 +36,7 @@ export function SelectCategory({ onChange }) {
         <SelectGroup>
           {categoryList.length === 0 && (
             <SelectItem disabled value='no-categories'>
-              No categories available
+              No categories available. Create one first.
             </SelectItem>
           )}
 
@@ -42,10 +45,6 @@ export function SelectCategory({ onChange }) {
               {category.name}
             </SelectItem>
           ))}
-
-          <div className='text-sm text-blue-500 p-2 text-center'>
-            <Link href='/dashboard/category'>+ Create New Category</Link>
-          </div>
         </SelectGroup>
       </SelectContent>
     </Select>

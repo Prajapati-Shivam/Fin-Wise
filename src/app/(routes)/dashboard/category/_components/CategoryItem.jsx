@@ -5,7 +5,7 @@ import useFinanceStore from '@/app/_store/financeStore';
 import { useUser } from '@clerk/nextjs';
 
 function CategoryItem({ category }) {
-  const { fetchCategoryList } = useFinanceStore();
+  const { currentUser, fetchCategoryList } = useFinanceStore();
   const { user } = useUser();
   return (
     <div className='p-5 border rounded-2xl hover:shadow-md h-[150px] flex flex-col justify-between'>
@@ -40,9 +40,7 @@ function CategoryItem({ category }) {
         </div>
         <DeleteCategoryDialog
           category={category}
-          refreshData={() =>
-            fetchCategoryList(user?.primaryEmailAddress?.emailAddress)
-          }
+          refreshData={() => fetchCategoryList(currentUser?.id)}
         />
       </div>
     </div>

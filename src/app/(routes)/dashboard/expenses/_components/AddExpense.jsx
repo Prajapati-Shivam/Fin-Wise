@@ -8,13 +8,14 @@ import React, { useState } from 'react';
 import { toast } from 'sonner';
 import { SelectCategory } from '../../category/_components/SelectCategory';
 import { useUser } from '@clerk/nextjs';
+import useFinanceStore from '@/app/_store/financeStore';
 
 function AddExpense({ onSuccess }) {
   const [name, setName] = useState('');
   const [amount, setAmount] = useState('');
   const [selectedCategoryId, setSelectedCategoryId] = useState(null);
   const [loading, setLoading] = useState(false);
-
+  const { currentUser } = useFinanceStore();
   const { user } = useUser();
 
   const addNewExpense = async () => {
@@ -37,7 +38,7 @@ function AddExpense({ onSuccess }) {
           name: name.trim(),
           amount: Number(amount),
           categoryId: selectedCategoryId,
-          createdBy: user?.primaryEmailAddress?.emailAddress,
+          userId: currentUser?.id,
         })
         .returning();
 

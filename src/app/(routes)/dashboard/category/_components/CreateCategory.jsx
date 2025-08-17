@@ -18,7 +18,8 @@ function CreateCategory() {
   const [loading, setLoading] = useState(false);
 
   const { user } = useUser();
-  const { fetchCategoryList } = useFinanceStore();
+  const userEmail = user?.primaryEmailAddress?.emailAddress;
+  const { currentUser, fetchCategoryList } = useFinanceStore();
 
   const onCreateCategory = async () => {
     if (!name.trim()) {
@@ -26,7 +27,7 @@ function CreateCategory() {
       return;
     }
 
-    if (!user?.primaryEmailAddress?.emailAddress) {
+    if (!userEmail) {
       toast.error('User not authenticated');
       return;
     }
@@ -37,7 +38,7 @@ function CreateCategory() {
       const existing = await db
         .select()
         .from(Category)
-        .where(eq(Category.createdBy, user.primaryEmailAddress.emailAddress));
+        .where(eq(Category.createdBy, currentUser?.id));
 
       const alreadyExists = existing.some(
         (cat) => cat.name.trim().toLowerCase() === name.trim().toLowerCase()
@@ -51,14 +52,14 @@ function CreateCategory() {
       await db.insert(Category).values({
         name: name.trim(),
         icon: emojiIcon,
-        createdBy: user.primaryEmailAddress.emailAddress,
+        createdBy: currentUser?.id,
       });
 
       toast.success('Category created successfully!');
       setName('');
       setEmojiIcon('😀');
       setOpenEmojiPicker(false);
-      fetchCategoryList(user.primaryEmailAddress.emailAddress);
+      fetchCategoryList(currentUser?.id);
     } catch (err) {
       console.error(err);
       toast.error('Something went wrong while creating the category.');
