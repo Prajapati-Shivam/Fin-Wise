@@ -35,10 +35,7 @@ const TestSendReport = ({ userEmail, expenseList, categoryList }) => {
       formData.append('email', userEmail);
 
       // Call the API
-      const res = await fetch('/api/send-expense-report', {
-        method: 'POST',
-        body: formData,
-      });
+      const res = await fetch('/api/send-expense-report');
 
       if (res.ok) {
         toast.success('Report sent successfully!');

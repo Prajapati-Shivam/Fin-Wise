@@ -72,66 +72,66 @@ function ExpensesScreen() {
   };
 
   // Send PDF on 1st of the month if enabled
-  useEffect(() => {
-    const sendMonthlyReportIfNeeded = async () => {
-      if (!receiveReport || !email) return;
+  // useEffect(() => {
+  //   const sendMonthlyReportIfNeeded = async () => {
+  //     if (!receiveReport || !email) return;
 
-      const today = new Date();
-      if (today.getDate() !== 1) return;
+  //     const today = new Date();
+  //     if (today.getDate() !== 1) return;
 
-      const lastSent = localStorage.getItem('lastReportSentAt');
-      const lastSentDate = lastSent ? new Date(lastSent) : null;
+  //     const lastSent = localStorage.getItem('lastReportSentAt');
+  //     const lastSentDate = lastSent ? new Date(lastSent) : null;
 
-      if (
-        lastSentDate &&
-        lastSentDate.getFullYear() === today.getFullYear() &&
-        lastSentDate.getMonth() === today.getMonth()
-      ) {
-        return; // already sent this month
-      }
+  //     if (
+  //       lastSentDate &&
+  //       lastSentDate.getFullYear() === today.getFullYear() &&
+  //       lastSentDate.getMonth() === today.getMonth()
+  //     ) {
+  //       return; // already sent this month
+  //     }
 
-      const blob = await pdf(
-        <DynamicExpenseReportDocument
-          expenseList={expenseList}
-          categoryList={categoryList}
-          userEmail={email}
-        />
-      ).toBlob();
+  //     const blob = await pdf(
+  //       <DynamicExpenseReportDocument
+  //         expenseList={expenseList}
+  //         categoryList={categoryList}
+  //         userEmail={email}
+  //       />
+  //     ).toBlob();
 
-      if (!blob) {
-        toast.error('Failed to generate PDF.');
-        return;
-      }
+  //     if (!blob) {
+  //       toast.error('Failed to generate PDF.');
+  //       return;
+  //     }
 
-      const formData = new FormData();
-      formData.append(
-        'pdf',
-        new File([blob], 'ExpenseReport.pdf', { type: 'application/pdf' })
-      );
-      formData.append('email', email);
+  //     const formData = new FormData();
+  //     formData.append(
+  //       'pdf',
+  //       new File([blob], 'ExpenseReport.pdf', { type: 'application/pdf' })
+  //     );
+  //     formData.append('email', email);
 
-      try {
-        const res = await fetch('/api/send-expense-report', {
-          method: 'POST',
-          body: formData,
-        });
+  //     try {
+  //       const res = await fetch('/api/send-expense-report', {
+  //         method: 'POST',
+  //         body: formData,
+  //       });
 
-        if (res.ok) {
-          localStorage.setItem('lastReportSentAt', new Date().toISOString());
-          toast.success('Monthly expense report sent!');
-        } else {
-          toast.error('Failed to send expense report.');
-        }
-      } catch (err) {
-        console.error('Error sending report:', err);
-        toast.error('An error occurred while sending report.');
-      }
-    };
+  //       if (res.ok) {
+  //         localStorage.setItem('lastReportSentAt', new Date().toISOString());
+  //         toast.success('Monthly expense report sent!');
+  //       } else {
+  //         toast.error('Failed to send expense report.');
+  //       }
+  //     } catch (err) {
+  //       console.error('Error sending report:', err);
+  //       toast.error('An error occurred while sending report.');
+  //     }
+  //   };
 
-    if (expenseList.length > 0 && categoryList.length > 0 && currentUser) {
-      sendMonthlyReportIfNeeded();
-    }
-  }, [expenseList, categoryList, currentUser, email, receiveReport]);
+  //   if (expenseList.length > 0 && categoryList.length > 0 && currentUser) {
+  //     sendMonthlyReportIfNeeded();
+  //   }
+  // }, [expenseList, categoryList, currentUser, email, receiveReport]);
 
   if (error) {
     toast.error('An error occurred while fetching expenses.');

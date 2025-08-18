@@ -7,17 +7,18 @@ import {
   getExpensesForUser,
   getCategoriesForUser,
 } from '@/db/queries';
+import React from 'react';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 async function sendExpenseReport({ email, expenseList, categoryList }) {
   // Render PDF to a Buffer on the server
   const pdfBuffer = await renderToBuffer(
-    <ExpenseReportDocument
-      expenseList={expenseList}
-      categoryList={categoryList}
-      userEmail={email}
-    />
+    React.createElement(ExpenseReportDocument, {
+      expenseList,
+      categoryList,
+      userEmail: email,
+    })
   );
 
   const fileName = `${new Date().toLocaleString('default', { month: 'long' })}-Expense-Report.pdf`;

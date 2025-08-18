@@ -25,7 +25,6 @@ const Dashboard = () => {
     loading,
   } = useFinanceStore();
 
-  console.log('Current User:', currentUser);
   // Redirect to sign-in if the user is not logged in
   useEffect(() => {
     if (isLoaded && !user) {
