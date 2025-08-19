@@ -4,7 +4,10 @@ import { Expenses, Category, Users } from '@/db/schema';
 
 // 1. Get all users who opted in for monthly reports
 export async function getAllOptedInUsers() {
-  return await db.select().from(Users).where(eq(Users.receiveReport, true));
+  return await db
+    .selectDistinct()
+    .from(Users)
+    .where(eq(Users.receiveReport, true));
 }
 
 // 2. Get all expenses for a specific user

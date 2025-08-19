@@ -47,13 +47,14 @@ async function sendExpenseReport({ email, expenseList, categoryList }) {
 
 // GET — triggered by Vercel cron job
 export async function GET() {
+  console.log('Running cron job to send monthly expense reports...');
   try {
     // const today = new Date();
     // if (today.getDate() !== 1) {
     //   return NextResponse.json({ message: 'Not the first day of the month — skipping.' });
     // }
 
-    const users = await getAllOptedInUsers(); // from DB
+    const users = await getAllOptedInUsers();
     const results = [];
 
     for (const user of users) {
