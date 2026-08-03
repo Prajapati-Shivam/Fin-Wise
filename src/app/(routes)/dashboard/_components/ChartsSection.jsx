@@ -46,16 +46,22 @@ function ChartsSection({ expenseList, categoryList }) {
   });
 
   // Spending over time (by date)
-  const spendOverTime = expenseList.reduce((acc, e) => {
-    const date = new Date(e.createdAt).toLocaleDateString();
-    const existing = acc.find((item) => item.date === date);
-    if (existing) {
-      existing.amount += Number(e.amount);
-    } else {
-      acc.push({ date, amount: Number(e.amount) });
-    }
-    return acc;
-  }, []);
+  const spendOverTime = expenseList
+    .reduce((acc, e) => {
+      const date = new Date(e.createdAt).toLocaleDateString();
+      const existing = acc.find((item) => item.date === date);
+      if (existing) {
+        existing.amount += Number(e.amount);
+      } else {
+        acc.push({
+          date,
+          amount: Number(e.amount),
+          timestamp: new Date(e.createdAt).getTime(),
+        });
+      }
+      return acc;
+    }, [])
+    .sort((a, b) => a.timestamp - b.timestamp);
 
   return (
     <div className='flex flex-col gap-5'>

@@ -22,7 +22,7 @@ import {
 } from '@/components/ui/drawer';
 import AddExpense from './AddExpense';
 
-export function AddExpenseDialog({ refreshData }) {
+export function AddExpenseDialog({ refreshData = () => {} }) {
   const [open, setOpen] = React.useState(false);
   const [isDesktop, setIsDesktop] = React.useState(false);
 

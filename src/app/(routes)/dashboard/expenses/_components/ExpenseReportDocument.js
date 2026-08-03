@@ -4,6 +4,7 @@ import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
 const styles = StyleSheet.create({
   page: { padding: 30, fontSize: 12, fontFamily: 'Helvetica' },
   header: { fontSize: 18, marginBottom: 10, textAlign: 'center' },
+  subheader: { fontSize: 11, marginBottom: 8, textAlign: 'center' },
   sectionTitle: { fontSize: 14, marginVertical: 10, fontWeight: 'bold' },
   table: { display: 'table', width: 'auto', marginBottom: 10 },
   tableRow: { flexDirection: 'row' },
@@ -15,10 +16,28 @@ export function ExpenseReportDocument({
   expenseList = [],
   categoryList = [],
   userEmail = '',
+  reportTitle = '',
+  reportPeriodLabel = '',
+  startDate = null,
+  endDate = null,
 }) {
+  const visibleExpenses = expenseList.filter((expense) => {
+    const expenseDate = new Date(expense.createdAt);
+
+    if (startDate && expenseDate < startDate) {
+      return false;
+    }
+
+    if (endDate && expenseDate > endDate) {
+      return false;
+    }
+
+    return true;
+  });
+
   // Sort by date ascending
-  const sortedExpenses = [...expenseList].sort(
-    (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
+  const sortedExpenses = [...visibleExpenses].sort(
+    (a, b) => new Date(a.createdAt) - new Date(b.createdAt),
   );
 
   // Total expenses
@@ -36,7 +55,7 @@ export function ExpenseReportDocument({
       const catExpenses = sortedExpenses.filter((e) => e.categoryId === cat.id);
       const catTotal = catExpenses.reduce(
         (sum, e) => sum + Number(e.amount),
-        0
+        0,
       );
       return {
         ...cat,
@@ -50,9 +69,12 @@ export function ExpenseReportDocument({
     <Document>
       <Page style={styles.page}>
         <Text style={styles.header}>
-          FinWise: {new Date().toLocaleDateString('en-US', { month: 'long' })}{' '}
-          Expense Report
+          {reportTitle ||
+            `FinWise: ${new Date().toLocaleDateString('en-US', { month: 'long' })} Expense Report`}
         </Text>
+        {reportPeriodLabel ? (
+          <Text style={styles.subheader}>{reportPeriodLabel}</Text>
+        ) : null}
         <Text>Email: {userEmail}</Text>
         <Text style={{ marginVertical: 5 }}>
           Total Expenses: {total.toLocaleString()}

@@ -1,5 +1,5 @@
-import { SignIn } from '@clerk/nextjs';
 import Image from 'next/image';
+import AuthLoginPanel from './_components/AuthLoginPanel';
 
 export default function Page() {
   return (
@@ -40,8 +40,8 @@ export default function Page() {
           </div>
         </section>
 
-        <main className='flex items-center justify-center px-8 py-8 sm:px-12 lg:col-span-7 lg:px-16 lg:py-12 xl:col-span-6'>
-          <div className='max-w-xl lg:max-w-3xl'>
+        <main className='flex min-h-[calc(100vh-8rem)] items-center justify-center px-8 py-8 sm:px-12 lg:col-span-7 lg:px-16 lg:py-12 xl:col-span-6'>
+          <div className='flex w-full flex-col items-center'>
             <div className='relative -mt-16 block lg:hidden'>
               <a
                 className='inline-flex size-16 items-center justify-center rounded-full bg-white text-blue-600 sm:size-20'
@@ -70,7 +70,7 @@ export default function Page() {
               </p>
             </div>
 
-            <SignIn path='/sign-in' fallbackRedirectUrl='/dashboard' />
+            <AuthLoginPanel />
           </div>
         </main>
       </div>

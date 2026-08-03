@@ -1,5 +1,29 @@
 const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
 // const apikey = 123;
+
+function buildFallbackAdvice({
+  totalSpend,
+  averageDailySpend,
+  highestExpense,
+  expenseCount,
+}) {
+  const total = Number(totalSpend || 0);
+  const average = Number(averageDailySpend || 0);
+  const highest = Number(highestExpense || 0);
+  const count = Number(expenseCount || 0);
+
+  const formatter = new Intl.NumberFormat('en-IN', {
+    maximumFractionDigits: 2,
+  });
+
+  return [
+    'I could not reach Gemini right now, so here is a quick fallback based on your spending:',
+    '',
+    `- Your total spend is ₹${formatter.format(total)}. Set a small weekly cap so the next few days stay predictable.`,
+    `- Your average daily spend is ₹${formatter.format(average)}. Try trimming it by 10% this week and track whether that sticks.`,
+    `- Your highest expense was ₹${formatter.format(highest)} across ${count} entries. Review that category first for easy reductions.`,
+  ].join('\n');
+}
 /**
  * Generates financial advice based on various expense metrics.
  * @param {{
@@ -16,6 +40,17 @@ export default async function getFinancialAdvice({
   highestExpense,
   expenseCount,
 }) {
+  const fallbackAdvice = buildFallbackAdvice({
+    totalSpend,
+    averageDailySpend,
+    highestExpense,
+    expenseCount,
+  });
+
+  if (!apiKey) {
+    return fallbackAdvice;
+  }
+
   try {
     const prompt = `A user has recorded the following spending stats:
 - Total Spend: ₹${totalSpend.toFixed(2)}
@@ -44,21 +79,24 @@ Based on this data, give 2–3 concise and practical financial advice points to 
             },
           ],
         }),
-      }
+      },
     );
 
     if (!response.ok) {
+      if (response.status === 429) {
+        return fallbackAdvice;
+      }
+
       throw new Error(
-        `Gemini API error: ${response.status} ${response.statusText}`
+        `Gemini API error: ${response.status} ${response.statusText}`,
       );
     }
 
     const data = await response.json();
 
     const advice = data.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
-    return advice;
+    return advice || fallbackAdvice;
   } catch (error) {
-    console.error('❌ Error fetching financial advice:', error.message);
-    return 'Sorry, we could not fetch financial advice at the moment.';
+    return fallbackAdvice;
   }
 }

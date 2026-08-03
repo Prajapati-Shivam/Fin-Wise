@@ -2,7 +2,12 @@ import React from 'react';
 import formatNumber from '@/lib/formatNum';
 import { PiggyBank } from 'lucide-react';
 
-const InfoCard = ({ amount, title, icon: Icon = PiggyBank }) => {
+const InfoCard = ({ amount, title, icon: Icon = PiggyBank, isCurrency = true }) => {
+  const numValue = amount !== undefined && amount !== null ? Number(amount) : 0;
+  const formattedAmount = isCurrency
+    ? `₹${formatNumber(numValue)}`
+    : formatNumber(numValue);
+
   return (
     <div className='border p-5 rounded-2xl flex items-center justify-between bg-gray-200 dark:bg-gray-900 shadow-md hover:shadow-lg transition-shadow duration-300'>
       <div>
@@ -10,7 +15,7 @@ const InfoCard = ({ amount, title, icon: Icon = PiggyBank }) => {
           {title}
         </h3>
         <div className='font-bold text-2xl text-gray-900 dark:text-white'>
-          {amount}
+          {formattedAmount}
         </div>
       </div>
       <div className='flex items-center justify-center size-14 rounded-full bg-gradient-to-r from-blue-500 via-blue-500 to-indigo-500 text-white'>

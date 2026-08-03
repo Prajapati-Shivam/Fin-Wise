@@ -3,6 +3,11 @@
 import { db } from '@/db';
 import { Users } from '@/db/schema';
 import { eq } from 'drizzle-orm';
+import {
+  ensureDefaultCategoriesForUser,
+  ensureDemoExpensesForUser,
+} from '@/db/queries';
+import { DEMO_CREDENTIALS } from '@/lib/demoConfig';
 
 export async function ensureUser(email) {
   if (!email) return null;
@@ -19,8 +24,14 @@ export async function ensureUser(email) {
       })
       .returning();
 
+    await ensureDefaultCategoriesForUser(newUser.id);
+    await ensureDemoExpensesForUser(newUser.id, email);
+
     return newUser;
   }
+
+  await ensureDefaultCategoriesForUser(existingUser.id);
+  await ensureDemoExpensesForUser(existingUser.id, email);
 
   return existingUser;
 }

@@ -5,24 +5,35 @@ import ExpenseListTable from './_components/ExpenseListTable';
 import { useUser } from '@clerk/nextjs';
 import useFinanceStore from '@/app/_store/financeStore';
 import { toast } from 'sonner';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Download } from 'lucide-react';
 import { AddExpenseDialog } from './_components/AddExpenseDialog';
+import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
-// import TestSendReport from './_components/TestSendReport';
-import dynamic from 'next/dynamic';
 import { updateReceiveReport } from '@/app/action/user';
-// const TestDownload = dynamic(() => import('./_components/test-download'), {
-//   ssr: false,
-//   loading: () => <span>Loading Download...</span>,
-// });
 
-const DynamicExpenseReportDocument = dynamic(
-  () =>
-    import('./_components/ExpenseReportDocument').then(
-      (mod) => mod.ExpenseReportDocument
-    ),
-  { ssr: false }
-);
+const getMonthToDateRange = (date = new Date()) => {
+  const startDate = new Date(date.getFullYear(), date.getMonth(), 1);
+  const endDate = new Date(date);
+
+  return { startDate, endDate };
+};
+
+const formatDateRangeLabel = (startDate, endDate) =>
+  `${startDate.toLocaleDateString('en-US', {
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+  })} - ${endDate.toLocaleDateString('en-US', {
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+  })}`;
+
+const formatMonthToDateFileName = (date = new Date()) => {
+  const month = date.toLocaleDateString('en-US', { month: 'long' });
+  const day = date.getDate();
+  return `${month}-1-to-${day}-Expense-Report.pdf`;
+};
 
 function ExpensesScreen() {
   const {
@@ -39,6 +50,7 @@ function ExpensesScreen() {
   const { user } = useUser();
   const email = user?.primaryEmailAddress?.emailAddress;
   const [receiveReport, setReceiveReport] = useState(false);
+  const [downloadingReport, setDownloadingReport] = useState(false);
 
   useEffect(() => {
     if (email) {
@@ -68,6 +80,60 @@ function ExpensesScreen() {
     } catch (err) {
       console.error('Error updating preference:', err);
       toast.error('Error updating preference.');
+    }
+  };
+
+  const handleDownloadMonthToDateReport = async () => {
+    if (!email || expenseList.length === 0 || categoryList.length === 0) {
+      toast.error('Add at least one expense before downloading a report.');
+      return;
+    }
+
+    const { startDate, endDate } = getMonthToDateRange();
+
+    const monthToDateExpenses = expenseList.filter((expense) => {
+      const expenseDate = new Date(expense.createdAt);
+      return expenseDate >= startDate && expenseDate <= endDate;
+    });
+
+    if (monthToDateExpenses.length === 0) {
+      toast.error('No expenses found for the current month yet.');
+      return;
+    }
+
+    setDownloadingReport(true);
+
+    try {
+      const [{ ExpenseReportDocument }, { pdf }] = await Promise.all([
+        import('./_components/ExpenseReportDocument'),
+        import('@react-pdf/renderer'),
+      ]);
+
+      const blob = await pdf(
+        <ExpenseReportDocument
+          expenseList={monthToDateExpenses}
+          categoryList={categoryList}
+          userEmail={email}
+          reportTitle='FinWise: Month-to-Date Expense Report'
+          reportPeriodLabel={formatDateRangeLabel(startDate, endDate)}
+          startDate={startDate}
+          endDate={endDate}
+        />,
+      ).toBlob();
+
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = formatMonthToDateFileName(endDate);
+      link.click();
+      URL.revokeObjectURL(url);
+
+      toast.success('Month-to-date report downloaded.');
+    } catch (err) {
+      console.error('Error downloading month-to-date report:', err);
+      toast.error('Failed to download the report. Please try again.');
+    } finally {
+      setDownloadingReport(false);
     }
   };
 
@@ -169,7 +235,17 @@ function ExpensesScreen() {
         <AddExpenseDialog
           refreshData={() => fetchExpenseList(currentUser?.id)}
         />
-        {/* <Input type='text' placeholder='Search expenses...' /> */}
+        <Button
+          variant='secondary'
+          onClick={handleDownloadMonthToDateReport}
+          disabled={downloadingReport || expenseList.length === 0}
+          className='rounded-full'
+        >
+          <Download className='mr-2 size-4' />
+          {downloadingReport
+            ? 'Preparing report...'
+            : 'Download month-to-date report'}
+        </Button>
       </div>
 
       {loading ? (

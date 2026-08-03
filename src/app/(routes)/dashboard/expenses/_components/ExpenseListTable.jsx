@@ -60,7 +60,7 @@ function ExpenseListTable({ expensesList }) {
         {categoryList.map((cat) => (
           <Button
             key={cat.id}
-            variant={`${selectedCategoryId === cat.id ? 'outline' : 'primary'}`}
+            variant={selectedCategoryId === cat.id ? 'default' : 'outline'}
             onClick={() => {
               setSelectedCategoryId(
                 selectedCategoryId === cat.id ? '' : cat.id

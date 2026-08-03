@@ -11,7 +11,7 @@ import { toast } from 'sonner';
 import useFinanceStore from '@/app/_store/financeStore';
 import { Loader2 } from 'lucide-react';
 
-function CreateCategory() {
+function CreateCategory({ onSuccess }) {
   const [emojiIcon, setEmojiIcon] = useState('😀');
   const [openEmojiPicker, setOpenEmojiPicker] = useState(false);
   const [name, setName] = useState('');
@@ -59,7 +59,8 @@ function CreateCategory() {
       setName('');
       setEmojiIcon('😀');
       setOpenEmojiPicker(false);
-      fetchCategoryList(currentUser?.id);
+      await fetchCategoryList(currentUser?.id);
+      if (onSuccess) onSuccess();
     } catch (err) {
       console.error(err);
       toast.error('Something went wrong while creating the category.');

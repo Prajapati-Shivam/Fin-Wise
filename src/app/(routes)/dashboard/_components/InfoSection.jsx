@@ -7,7 +7,7 @@ import {
   Tag,
   TrendingUp,
 } from 'lucide-react';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useUser } from '@clerk/nextjs';
 import InfoCard from './InfoCard';
 import { ReceiptText, ListOrdered } from 'lucide-react';
@@ -20,10 +20,10 @@ import ReactMarkdown from 'react-markdown';
 
 const InfoSection = () => {
   const { user } = useUser();
-  const [loadingTotals, setLoadingTotals] = useState(true);
   const [loadingAdvice, setLoadingAdvice] = useState(false);
+  const adviceRequestInFlight = useRef(false);
   const [financialAdvice, setFinancialAdvice] = useState(
-    'Click the button above to get financial advice based on your expenses.'
+    'Click the button above to get financial advice based on your expenses.',
   );
   const [totalSpend, setTotalSpend] = useState(0);
   const [averageDailySpend, setAverageDailySpend] = useState(0);
@@ -34,6 +34,7 @@ const InfoSection = () => {
     useFinanceStore();
 
   const userEmail = user?.primaryEmailAddress?.emailAddress;
+  const adviceCacheKey = `${totalSpend}|${averageDailySpend}|${highestExpense}|${expenseCount}`;
 
   useEffect(() => {
     if (userEmail) {
@@ -44,18 +45,23 @@ const InfoSection = () => {
 
   useEffect(() => {
     if (expenseList.length > 0) {
-      setLoadingTotals(true);
       calculateInfo();
-      setLoadingTotals(false);
+    } else {
+      setTotalSpend(0);
+      setAverageDailySpend(0);
+      setHighestExpense(0);
+      setExpenseCount(0);
     }
   }, [expenseList]);
 
   useEffect(() => {
-    // Load cached advice if available and not expired
+    if (!expenseList.length) return;
+
     const cachedAdvice = localStorage.getItem('financialAdvice');
     const cachedTime = localStorage.getItem('financialAdviceTimestamp');
+    const cachedKey = localStorage.getItem('financialAdviceCacheKey');
 
-    if (cachedAdvice && cachedTime) {
+    if (cachedAdvice && cachedTime && cachedKey === adviceCacheKey) {
       const now = new Date();
       const lastFetched = new Date(cachedTime);
       const diffInHours = (now - lastFetched) / (1000 * 60 * 60);
@@ -64,36 +70,48 @@ const InfoSection = () => {
         setFinancialAdvice(cachedAdvice);
       }
     }
-  }, []);
+  }, [adviceCacheKey, expenseList.length]);
 
   const handleFetchAdvice = async () => {
-    // Check for cached advice again before fetching
-    console.log('click');
-
     if (totalSpend <= 0) return;
+    if (adviceRequestInFlight.current) return;
 
+    adviceRequestInFlight.current = true;
     try {
+      const cachedAdvice = localStorage.getItem('financialAdvice');
+      const cachedTime = localStorage.getItem('financialAdviceTimestamp');
+      const cachedKey = localStorage.getItem('financialAdviceCacheKey');
+
+      if (cachedAdvice && cachedTime && cachedKey === adviceCacheKey) {
+        const now = new Date();
+        const lastFetched = new Date(cachedTime);
+        const diffInHours = (now - lastFetched) / (1000 * 60 * 60);
+
+        if (diffInHours < 24) {
+          setFinancialAdvice(cachedAdvice);
+          return;
+        }
+      }
+
       setLoadingAdvice(true);
       const advice = await getFinancialAdvice({
         totalSpend,
-        averageDailySpend: parseFloat(averageDailySpend),
+        averageDailySpend,
         highestExpense,
         expenseCount,
       });
 
-      if (!advice.startsWith('Sorry')) {
-        setFinancialAdvice(advice);
-        localStorage.setItem('financialAdvice', advice);
-        localStorage.setItem(
-          'financialAdviceTimestamp',
-          new Date().toISOString()
-        );
-      } else {
-        toast.error(advice);
-      }
+      setFinancialAdvice(advice);
+      localStorage.setItem('financialAdvice', advice);
+      localStorage.setItem('financialAdviceCacheKey', adviceCacheKey);
+      localStorage.setItem(
+        'financialAdviceTimestamp',
+        new Date().toISOString(),
+      );
     } catch (err) {
-      setFinancialAdvice('Failed to fetch advice. Please try again later.');
+      toast.error('Failed to fetch advice. Please try again later.');
     } finally {
+      adviceRequestInFlight.current = false;
       setLoadingAdvice(false);
     }
   };
@@ -122,12 +140,12 @@ const InfoSection = () => {
     // Days between first and last expense (avoid division by 0)
     const daysActive = Math.max(
       1,
-      Math.ceil((maxDate - minDate) / (1000 * 60 * 60 * 24)) + 1
+      Math.ceil((maxDate - minDate) / (1000 * 60 * 60 * 24)) + 1,
     );
 
     setTotalSpend(tSpend);
     setHighestExpense(highest);
-    setAverageDailySpend((tSpend / daysActive).toFixed(2));
+    setAverageDailySpend(Number((tSpend / daysActive).toFixed(2)));
     setExpenseCount(expenseList.length);
   };
 
@@ -156,19 +174,21 @@ const InfoSection = () => {
               title='Expenses Count'
               amount={expenseCount}
               icon={ListOrdered}
+              isCurrency={false}
             />
           </div>
 
           {/* AI Advice Box */}
-          <div className='border p-3 sm:p-5 sm:w-1/2 rounded-2xl flex items-center justify-between'>
+          <div className='border p-3 sm:p-5 sm:w-1/2 rounded-2xl flex items-center justify-between bg-white/70 dark:bg-black/20 shadow-sm'>
             <div>
               <div className='flex mb-2 items-center space-x-1'>
                 <Button
+                  type='button'
                   variant='ghost'
-                  className='p-2 flex items-center space-x-2'
+                  className='p-2 flex items-center space-x-2 rounded-full'
                   onClick={handleFetchAdvice}
-                  disabled={loadingAdvice}
-                  title='Advice refreshes every 24 hours or on button click.'
+                  disabled={loadingAdvice || adviceRequestInFlight.current}
+                  title='Advice refreshes every 24 hours for the same spending snapshot.'
                 >
                   <div className='text-xl font-semibold'>FinWise AI</div>
                   <div
@@ -192,7 +212,7 @@ const InfoSection = () => {
                     Fetching financial advice...
                   </p>
                 ) : (
-                  <div className='text-gray-700 text-md dark:text-gray-300'>
+                  <div className='text-gray-700 text-md dark:text-gray-300 leading-6'>
                     <ReactMarkdown>{financialAdvice}</ReactMarkdown>
                   </div>
                 )}

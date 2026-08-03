@@ -18,11 +18,11 @@ function CategoryList() {
   const { user } = useUser();
   const userEmail = user?.primaryEmailAddress?.emailAddress;
   useEffect(() => {
-    if (userEmail) {
-      fetchCategoryList(currentUser?.id);
-      fetchExpenseList(currentUser?.id);
+    if (currentUser?.id) {
+      fetchCategoryList(currentUser.id);
+      fetchExpenseList(currentUser.id);
     }
-  }, [fetchCategoryList, fetchExpenseList, currentUser?.id, userEmail]);
+  }, [fetchCategoryList, fetchExpenseList, currentUser?.id]);
 
   const placeholders = Array.from({ length: 5 });
 

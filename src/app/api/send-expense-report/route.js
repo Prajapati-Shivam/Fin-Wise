@@ -46,8 +46,15 @@ async function sendExpenseReport({ email, expenseList, categoryList }) {
 }
 
 // GET — triggered by Vercel cron job
-export async function GET() {
+export async function GET(request) {
   console.log('Running cron job to send monthly expense reports...');
+
+  // Secure endpoint using CRON_SECRET check
+  const authHeader = request.headers.get('authorization');
+  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
     // const today = new Date();
     // if (today.getDate() !== 1) {

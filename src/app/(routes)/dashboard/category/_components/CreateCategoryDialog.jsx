@@ -53,7 +53,7 @@ export function CreateCategoryDialog() {
               Create a new category to organize your expenses
             </DialogDescription>
           </DialogHeader>
-          <CreateCategory />
+          <CreateCategory onSuccess={() => setOpen(false)} />
         </DialogContent>
       </Dialog>
     );
@@ -78,7 +78,7 @@ export function CreateCategoryDialog() {
             Create a new category to organize your expenses
           </DrawerDescription>
         </DrawerHeader>
-        <CreateCategory />
+        <CreateCategory onSuccess={() => setOpen(false)} />
         <DrawerFooter className='pt-2'>
           <DrawerClose asChild>
             <Button variant='outline'>Cancel</Button>
