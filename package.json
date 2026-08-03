@@ -2,6 +2,9 @@
   "name": "mini-project-1",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": "24.x"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -48,7 +51,7 @@
   "devDependencies": {
     "dotenv": "^16.4.5",
     "drizzle-kit": "^0.28.1",
-    "eslint": "^8",
+    "eslint": "^9",
     "eslint-config-next": "^16.0.7",
     "postcss": "^8",
     "tailwindcss": "^3.4.1"
